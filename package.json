@@ -4,6 +4,7 @@
   "description": "my new web app",
   "main": "index.js",
   "scripts": {
+    "start": "node server/index.js",
     "test": "hello world"
   },
   "repository": {
@@ -18,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/hanswryy/myweb-app/issues"
   },
-  "homepage": "https://github.com/hanswryy/myweb-app#readme"
+  "homepage": "https://github.com/hanswryy/myweb-app#readme",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
 }
