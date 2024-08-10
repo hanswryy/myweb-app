@@ -1,0 +1,22 @@
+{
+  "name": "myweb-app",
+  "version": "1.0.0",
+  "description": "my new web app",
+  "main": "index.js",
+  "scripts": {
+    "test": "hello world"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/hanswryy/myweb-app.git"
+  },
+  "keywords": [
+    "node"
+  ],
+  "author": "bujank",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hanswryy/myweb-app/issues"
+  },
+  "homepage": "https://github.com/hanswryy/myweb-app#readme"
+}
