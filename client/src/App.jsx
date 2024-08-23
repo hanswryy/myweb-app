@@ -2,6 +2,8 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 import axios from 'axios';
+import './index.css'
+import Card from './components/Card'
 
 function App() {
   const [message, setMessage] = React.useState([]);
@@ -25,7 +27,9 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+        <div className='flex justify-center items-center min-h-screen bg-gray-100'>
+          <Card />
+        </div>
         <p>{!message ? "Loading..." : message}</p>
         <ul>
           {users.map(user => (
