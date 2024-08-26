@@ -1,29 +1,24 @@
 // import react
-import React from "react"
+import React from "react";
+import bujank from "../images/bujank.jpg";
 
 const Card = () => {
   return (
-    <div className="max-w-sm rounded overflow-hidden shadow-lg m-4">
-      <img className="w-full" src="https://via.placeholder.com/150" alt="Sample" />
-      <div className="px-6 py-4">
-        <div className="font-bold text-xl mb-2">Card Title</div>
-        <p className="text-gray-700 text-base">
-          This is a simple card component styled using Tailwind CSS.
-        </p>
-      </div>
-      <div className="px-6 pt-4 pb-2">
-        <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
-          #tailwind
-        </span>
-        <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
-          #react
-        </span>
-        <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
-          #card
-        </span>
+    <div className="max-w-xs rounded-lg overflow-hidden shadow-sm bg-white">
+      <img className="w-full h-40 object-cover" src={bujank} alt="Sample" />
+      <div className="px-4 py-4">
+        <div className="font-bold text-sm mb-1 leading-tight">
+          Title of the drama 1 that makes two lines
+        </div>
+        <p className="text-xs text-gray-700">2024</p>
+        <p className="text-xs text-gray-700">Genre 1, Genre 2, Genre 3</p>
+        <div className="flex justify-between text-xs text-gray-500 mt-2">
+          <p>Rate 3.5/5</p>
+          <p>19 views</p>
+        </div>
       </div>
     </div>
-  );  
+  );
 };
 
 export default Card;
