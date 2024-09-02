@@ -26,7 +26,7 @@ function LandingPage() {
           </div>
 
           <div className="w-5/6">
-            <div className="flex space-x-2 mb-4 flex-wrap">
+            <div className="flex flex-col xl:flex-row space-x-0 xl:space-x-2 mb-4 flex-wrap">
               <select className="border border-gray-300 rounded px-4 py-2">
                 <option>Year</option>
               </select>
