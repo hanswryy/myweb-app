@@ -1,7 +1,10 @@
-import React from 'react';
-import Card from './components/Card'; // Ensure the import path is correct
+import React, { useState } from 'react';
+import Card from './components/Card';
+import SearchCard from './components/SearchCard'; 
 
 function LandingPage() {
+  const [searchTerm, setSearchTerm] = React.useState("");
+
   return (
     <div className="bg-gray-100">
       <div className="container mx-auto px-4 py-6">
@@ -12,6 +15,8 @@ function LandingPage() {
               type="text"
               placeholder="Search Drama"
               className="border border-gray-300 rounded-full px-4 py-2 w-64"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
@@ -50,17 +55,20 @@ function LandingPage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              <Card />
-              <Card />
-              <Card />
-              <Card />
-              <Card />
-              <Card />
-              <Card />
-              <Card />
-              {/* Add more <Card /> components as needed */}
+            <div className={searchTerm ? "space-y-4" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"}>
+              {searchTerm ? <SearchCard /> : <Card />}
             </div>
+
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <Card />
+              <Card />
+              <Card />
+              <Card />
+              <Card />
+              <Card />
+              <Card />
+              <Card />
+            </div> */}
           </div>
         </div>
       </div>

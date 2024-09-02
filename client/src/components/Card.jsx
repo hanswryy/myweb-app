@@ -1,12 +1,21 @@
 // import react
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import bujank from "../images/bujank.jpg";
 
 const Card = () => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate("/detailPage");
+  }
+
   return (
-    <div className="max-w-xs rounded-lg overflow-hidden shadow-sm bg-white">
-      <img className="w-full h-40 object-cover" src={bujank} alt="Sample" />
-      <div className="px-4 py-4">
+    <div className="max-w-xs rounded-lg overflow-hidden shadow-sm bg-white p-4" onClick={handleClick}>
+      <div className="flex-shrink-0">
+        <img className="w-full h-40 object-cover rounded-lg" src={bujank} alt="Sample" />
+      </div>
+      <div className="pt-2">
         <div className="font-bold text-sm mb-1 leading-tight">
           Title of the drama 1 that makes two lines
         </div>

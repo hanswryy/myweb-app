@@ -12,13 +12,6 @@ function DetailPage() {
             <div className="container mx-auto px-4 py-6">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl font-bold">DramaKu</h1>
-                    <div>
-                        <input
-                        type="text"
-                        placeholder="Search Drama"
-                        className="border border-gray-300 rounded-full px-4 py-2 w-64"
-                        />
-                    </div>
                 </div>
                 <div className="mx-auto w-2/3">
                     <div className="flex mb-6">
