@@ -13,19 +13,27 @@ function DetailPage() {
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl font-bold">DramaKu</h1>
                 </div>
-                <div className="mx-auto w-2/3">
-                    <div className="flex mb-6">
-                        <div className="lg:w-1/2">
-                            <img className="w-full rounded-xl" src={ikuyo} alt="Drama Poster" />
+                <div className="mx-auto lg:w-2/3">
+                    <div className="flex flex-col lg:flex-row mb-6">
+                        <div className="lg:w-1/2 flex flex-row items-start">
+                            <img className="w-36 lg:w-full rounded-xl" src={ikuyo} alt="Drama Poster" />
+                            <div className='ml-4'>
+                                <h2 className="text-2xl font-bold block lg:hidden mb-5">Title of the drama 1 that makes two lines</h2>
+                                <p className="text-sm block lg:hidden mb-1">Other titles: Title 2, Title 3, Title 4</p>
+                                <p className="text-sm block lg:hidden mb-1">Year: Spring 2024</p>
+                                <p className="text-sm block lg:hidden mb-1">Genres: Genre 1, Genre 2, Genre 3</p>
+                                <p className="text-sm block lg:hidden mb-1">Rating: 3.5/5</p>
+                                <p className="text-sm block lg:hidden">Availability: Fansub: @sub on X</p>
+                            </div>
                         </div>
                         <div className="lg:w-1/2 lg:pl-8">
-                            <h2 className="text-2xl font-bold mb-2">Title of the drama 1 that makes two lines</h2>
-                            <p className="text-sm mb-2">Other titles: Title 2, Title 3, Title 4</p>
-                            <p className="text-sm mb-2">Year: Spring 2024</p>
-                            <p className="text-sm mb-2">Synopsis: Sometimes unhelpful. I don't read it thoroughly. But what helps me is the genres. I need to see genres and actors. That is what I want.</p>
-                            <p className="text-sm mb-2">Genres: Genre 1, Genre 2, Genre 3</p>
-                            <p className="text-sm mb-2">Rating: 3.5/5</p>
-                            <p className="text-sm mb-4">Availability: Fansub: @sub on X</p>
+                            <h2 className="text-2xl font-bold mb-2 hidden lg:block">Title of the drama 1 that makes two lines</h2>
+                            <p className="text-sm mb-2 hidden lg:block">Other titles: Title 2, Title 3, Title 4</p>
+                            <p className="text-sm mb-2 hidden lg:block">Year: Spring 2024</p>
+                            <p className="text-sm mb-2 mt-4 lg:mt-0">Synopsis: Sometimes unhelpful. I don't read it thoroughly. But what helps me is the genres. I need to see genres and actors. That is what I want.</p>
+                            <p className="text-sm mb-2 hidden lg:block">Genres: Genre 1, Genre 2, Genre 3</p>
+                            <p className="text-sm mb-2 hidden lg:block">Rating: 3.5/5</p>
+                            <p className="text-sm mb-4 hidden lg:block">Availability: Fansub: @sub on X</p>
                         </div>
                     </div>
                     <div className="mt-8">
@@ -59,10 +67,10 @@ function DetailPage() {
                         <Review />
                     </div>
                     <h3 className="text-lg font-bold mb-4">Add yours!</h3>
-                    <div className="bg-white p-4 rounded shadow-lg w-1/2">
+                    <div className="bg-white p-4 rounded shadow-lg w-full lg:w-1/2">
                         <form>
-                            <div className="flex justify-betweem mb-4">
-                                <label className="w-1/3 block text-sm font-bold mb-2 mr-2">Name</label>
+                            <div className="flex flex-col lg:flex-row justify-between mb-4">
+                                <label className="w-full lg:w-1/3 block text-sm font-bold mb-2 lg:mb-0 lg:mr-2">Name</label>
                                 <input
                                     type="text"
                                     className="w-full px-2 py-1 border border-gray-300 rounded"
@@ -70,22 +78,22 @@ function DetailPage() {
                                 />
                             </div>
 
-                            <div className="flex items-center mb-4">
-                                <label className="w-1/3 block text-sm font-bold mb-2 mr-2">Rate</label>
+                            <div className="flex flex-col lg:flex-row items-start lg:items-center mb-4">
+                                <label className="w-full lg:w-1/3 block text-sm font-bold mb-2 lg:mb-0 lg:mr-2">Rate</label>
                                 <div className="flex space-x-1">
                                     {[...Array(5)].map((_, index) => (
-                                    <span
-                                        key={index}
-                                        className="text-2xl text-gray-400 cursor-pointer"
-                                    >
-                                        ★
-                                    </span>
+                                        <span
+                                            key={index}
+                                            className="text-2xl text-gray-400 cursor-pointer"
+                                        >
+                                            ★
+                                        </span>
                                     ))}
                                 </div>
                             </div>
 
-                            <div className="flex mb-4">
-                                <label className="w-1/3 block text-sm font-bold mb-2 mr-2 align-top">Your thoughts</label>
+                            <div className="flex flex-col lg:flex-row mb-4">
+                                <label className="w-full lg:w-1/3 block text-sm font-bold mb-2 lg:mb-0 lg:mr-2 align-top">Your thoughts</label>
                                 <textarea
                                     className="w-full px-4 py-2 border border-gray-300 rounded"
                                     placeholder="Share your thoughts"
@@ -93,7 +101,7 @@ function DetailPage() {
                                 ></textarea>
                             </div>
 
-                            <p className="text-xs text-gray-500 mb-4">you can only submit your comment once.</p>
+                            <p className="text-xs text-gray-500 mb-4">You can only submit your comment once.</p>
 
                             <button type="submit" className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition">Submit</button>
                         </form>
