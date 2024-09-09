@@ -9,6 +9,10 @@ app.get('/api', (req, res) => {
     res.json({ message: 'Hello from server!' });
 });
 
+app.get('/dramas', (req, res) => {
+    // using pool.query() to query the drama table
+});
+
 // get all users from users table
 app.get('/users', async (req, res) => {
     try {

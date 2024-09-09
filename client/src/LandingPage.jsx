@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Card from './components/Card';
 import SearchCard from './components/SearchCard'; 
+import SideBarMain from './components/SideBarMain';
 
 function LandingPage() {
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -21,7 +22,7 @@ function LandingPage() {
   }, []);
 
   return (
-    <div className="bg-gray-100">
+    <div className="bg-gray-50 min-h-screen">
       <div className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">DramaKu</h1>
@@ -37,25 +38,24 @@ function LandingPage() {
         </div>
 
         <div className="flex space-x-4 mb-6">
-          <div className="w-1/6">
-            <ul className="space-y-2">
-              <li><a href="#" className="text-lg font-semibold">Japan</a></li>
-              <li><a href="#" className="text-lg">Korea</a></li>
-              <li><a href="#" className="text-lg">China</a></li>
-            </ul>
+          <div className="w-1/6 hidden lg:block">
+            <SideBarMain selectedOption="dramas"/>
           </div>
 
-          <div className="w-5/6">
-
+          <div className="w-full 
+          lg:w-5/6">
             <div>
               {isMobile ? (
-                <div>
-                  <button
-                    className="bg-orange-500 text-white px-4 py-2 rounded mb-4"
-                    onClick={() => setFiltersExpanded(!filtersExpanded)}
-                  >
+                <div className='block lg:hidden items-center justify-between'>
+                  <div className="flex items-start justify-between">
+                    <SideBarMain selectedOption="dramas"/>
+                    <button
+                      className="bg-blue-400 text-white px-4 py-2 rounded mb-4 mr-2"
+                      onClick={() => setFiltersExpanded(!filtersExpanded)}
+                    >
                     {filtersExpanded ? 'Hide Filters' : 'Show Filters'}
-                  </button>
+                    </button>
+                  </div>
                   {filtersExpanded && (
                     <div className="flex flex-col space-y-2 mb-4">
                       <select className="border border-gray-300 rounded px-4 py-2">
@@ -76,7 +76,7 @@ function LandingPage() {
                       <select className="border border-gray-300 rounded px-4 py-2">
                         <option>Sorted by: Alphabetics</option>
                       </select>
-                      <button className="bg-orange-500 text-white px-4 py-2 rounded">
+                      <button className="bg-blue-400 text-white px-4 py-2 rounded">
                         Submit
                       </button>
                     </div>
@@ -102,7 +102,7 @@ function LandingPage() {
                   <select className="border border-gray-300 rounded px-4 py-2">
                     <option>Sorted by: Alphabetics</option>
                   </select>
-                  <button className="bg-orange-500 text-white px-4 py-2 rounded">
+                  <button className="bg-blue-400 text-white px-4 py-2 rounded">
                     Submit
                   </button>
                 </div>
