@@ -9,6 +9,13 @@ import CMSDrama from './CMSDrama';
 import CMSInputDrama from './CMSInputDrama';
 import Countries from './Countries';
 import CMSComments from './CMSComments';
+import Login from './Login';
+import Registrasi from './Registrasi';
+import Countries from './CMSCountries';
+import Awards from './CMSAwards';
+import Genres from './CMSGenres';
+import Actors from './CMSActors';
+import Users from './CMSUsers';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
