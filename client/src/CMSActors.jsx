@@ -1,6 +1,7 @@
 import React from 'react';
 import './App.css';
 import './index.css';
+import SideBarCMS from './components/SideBarCMS';
 
 function Actors() {
   return (
@@ -12,16 +13,7 @@ function Actors() {
 
         <div className="flex space-x-4">
           <div className="w-1/6">
-            <ul className="space-y-2">
-              <li><a href="#" className="text-md">Dramas</a></li>
-              <li><a href="#" className="text-md">Countries</a></li>
-              <li><a href="#" className="text-md">Awards</a></li>
-              <li><a href="#" className="text-md">Genres</a></li>
-              <li><a href="#" className="text-md font-semibold">Actors</a></li>
-              <li><a href="#" className="text-md">Comments</a></li>
-              <li><a href="#" className="text-md">Users</a></li>
-              <li><a href="#" className="text-md">Logout</a></li>
-            </ul>
+            <SideBarCMS selectedOption="actors"/>
           </div>
 
           <div className="w-5/6">

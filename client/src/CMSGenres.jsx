@@ -1,10 +1,11 @@
 import React from 'react';
 import './App.css';
 import './index.css';
+import SideBarCMS from './components/SideBarCMS';
 
 function Genres() {
   return (
-    <div className="bg-gray-100">
+    <div className="bg-gray-50">
       <div className="container mx-auto px-4 py-6">
         <div className="mb-6">
           <h1 className="text-2xl font-bold">DramaKu</h1>
@@ -12,16 +13,7 @@ function Genres() {
 
         <div className="flex space-x-4">
           <div className="w-1/6">
-            <ul className="space-y-2">
-              <li><a href="#" className="text-md">Dramas</a></li>
-              <li><a href="#" className="text-md">Countries</a></li>
-              <li><a href="#" className="text-md">Awards</a></li>
-              <li><a href="#" className="text-md font-semibold">Genres</a></li>
-              <li><a href="#" className="text-md">Actors</a></li>
-              <li><a href="#" className="text-md">Comments</a></li>
-              <li><a href="#" className="text-md">Users</a></li>
-              <li><a href="#" className="text-md">Logout</a></li>
-            </ul>
+            <SideBarCMS selectedOption="genres"/>
           </div>
 
           <div className="w-5/6">
@@ -65,7 +57,7 @@ function Genres() {
                             type="text"
                             value="Romance"
                             className="border border-gray-300 rounded px-2 py-1"
-                            style="max-width: 200px;"
+                            style={{ maxWidth: "200px" }}
                         />
                     </td>
                     <td className="p-2 actions">

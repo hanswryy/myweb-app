@@ -7,15 +7,12 @@ import LandingPage from './LandingPage';
 import DetailPage from './DetailPage';
 import CMSDrama from './CMSDrama';
 import CMSInputDrama from './CMSInputDrama';
-import Countries from './Countries';
 import CMSComments from './CMSComments';
-import Login from './Login';
-import Registrasi from './Registrasi';
-import Countries from './CMSCountries';
-import Awards from './CMSAwards';
-import Genres from './CMSGenres';
-import Actors from './CMSActors';
-import Users from './CMSUsers';
+import CMSCountries from './CMSCountries';
+import CMSAwards from './CMSAwards';
+import CMSGenres from './CMSGenres';
+import CMSActors from './CMSActors';
+import CMSUsers from './CMSUsers';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -26,8 +23,12 @@ root.render(
         <Route path="/detailPage" element={<DetailPage />} />
         <Route path="/cms" element={<CMSDrama />} />
         <Route path="/cms/input" element={<CMSInputDrama />} />
-        <Route path="/countries" element={<Countries />} />
+        <Route path="/cms/countries" element={<CMSCountries />} />
         <Route path="/cms/comments" element={<CMSComments />} />
+        <Route path="/cms/awards" element={<CMSAwards />} />
+        <Route path="/cms/genres" element={<CMSGenres />} />
+        <Route path="/cms/actors" element={<CMSActors />} />
+        <Route path="/cms/users" element={<CMSUsers />} />
       </Routes>
     </Router>
   </React.StrictMode>

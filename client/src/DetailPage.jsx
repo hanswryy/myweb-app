@@ -1,5 +1,4 @@
 import React from 'react';
-import { useNavigate } from "react-router-dom";
 
 import Actor from './components/Actor';
 import Review from './components/Review';
@@ -8,32 +7,11 @@ import placeholder from "./images/video_player_placeholder.png";
 import ikuyo from "./images/ikuyoo.jpeg";
 
 function DetailPage() {
-    const navigate = useNavigate();
-
     return (
-        <div className="bg-white">
+        <div className="bg-gray-50">
             <div className="container mx-auto px-4 py-6">
-                <div className="flex justify-between items-center mb-6 cursor-pointer">
-                    <h1 className="text-2xl font-bold" onClick={() => navigate("/")}>DramaKu</h1>
-                    <button
-                        className="bg-blue-400 text-white px-4 py-2 rounded flex items-center lg:hidden"
-                        onClick={() => navigate(-1)}
-                    >
-                        <svg
-                            className="w-6 h-6 mr-2"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M15 19l-7-7 7-7"
-                            ></path>
-                        </svg>
-                    </button>
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-2xl font-bold">DramaKu</h1>
                 </div>
                 <div className="mx-auto lg:w-2/3">
                     <div className="flex flex-col lg:flex-row mb-6">

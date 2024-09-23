@@ -25,7 +25,7 @@ function LandingPage() {
     <div className="bg-gray-50 min-h-screen">
       <div className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">DramaKu</h1>
+          <h1 className="text-2xl font-bold z-10">DramaKu</h1>
           <div>
             <input
               type="text"
@@ -38,12 +38,13 @@ function LandingPage() {
         </div>
 
         <div className="flex space-x-4 mb-6">
-          <div className="w-1/6 hidden lg:block">
+          <div className="w-1/5 hidden lg:block h-full absolute top-0 left-0 p-20 bg-blue-200">
             <SideBarMain selectedOption="dramas"/>
           </div>
 
-          <div className="w-full 
-          lg:w-5/6">
+          <div className="lg:w-1/6"/>
+
+          <div className="w-full lg:w-5/6">
             <div>
               {isMobile ? (
                 <div className='block lg:hidden items-center justify-between'>

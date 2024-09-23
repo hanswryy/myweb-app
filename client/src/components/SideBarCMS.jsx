@@ -65,12 +65,12 @@ const SideBarCMS = ({ selectedOption }) => {
                             <li><a href="/cms/input" className="text-lg">Input New Drama</a></li>
                         </ul>
                     </li>
-                    <li><a href="#" className={selectedOption === 'countries' ? "text-lg font-bold" : "text-lg"}>Countries</a></li>
-                    <li><a href="#" className={selectedOption === 'awards' ? "text-lg font-bold" : "text-lg"}>Awards</a></li>
-                    <li><a href="#" className={selectedOption === 'genres' ? "text-lg font-bold" : "text-lg"}>Genres</a></li>
-                    <li><a href="#" className={selectedOption === 'actors' ? "text-lg font-bold" : "text-lg"}>Actors</a></li>
+                    <li><a href="/cms/countries" className={selectedOption === 'countries' ? "text-lg font-bold" : "text-lg"}>Countries</a></li>
+                    <li><a href="/cms/awards" className={selectedOption === 'awards' ? "text-lg font-bold" : "text-lg"}>Awards</a></li>
+                    <li><a href="/cms/genres" className={selectedOption === 'genres' ? "text-lg font-bold" : "text-lg"}>Genres</a></li>
+                    <li><a href="/cms/actors" className={selectedOption === 'actors' ? "text-lg font-bold" : "text-lg"}>Actors</a></li>
                     <li><a href="/cms/comments" className={selectedOption === 'comments' ? "text-lg font-bold" : "text-lg"}>Comments</a></li>
-                    <li><a href="#" className={selectedOption === 'users' ? "text-lg font-bold" : "text-lg"}>Users</a></li>
+                    <li><a href="/cms/users" className={selectedOption === 'users' ? "text-lg font-bold" : "text-lg"}>Users</a></li>
                     <li><a href="#" className={selectedOption === 'logout' ? "text-lg font-bold" : "text-lg"}>Logout</a></li>
                 </ul>
             </div>
