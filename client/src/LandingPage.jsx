@@ -1,21 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import Card from './components/Card';
-import SearchCard from './components/SearchCard';
-import DramaList from "./components/DramaList";
 import SideBarMain from './components/SideBarMain';
 
 function LandingPage() {
-  const [searchTerm, setSearchTerm] = React.useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [isMobile, setIsMobile] = useState(false);
   const [dramas, setDramas] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1); // Current page state
+  const [totalCount, setTotalCount] = useState(0); // Total count state
+  const dramasPerPage = 12; // Dramas per page
   const [filtersExpanded, setFiltersExpanded] = useState(false);
 
   useEffect(() => {
-    fetch("/dramas")
-      .then(response => response.json())
-      .then(data => setDramas(data))
-      .catch(error => console.error("Error fetching dramas:", error));
+    const fetchDramas = async () => {
+      const response = await fetch(`/dramas?page=${currentPage}&limit=${dramasPerPage}`);
+      const data = await response.json();
+      setDramas(data); // Get dramas from API response
+    };
 
+    const fetchTotalCount = async () => {
+      const response = await fetch('/count');
+      const data = await response.json();
+      setTotalCount(data.count); // Get total count from API response
+    };
+
+    fetchDramas();
+    fetchTotalCount();
+    
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
     };
@@ -26,7 +37,9 @@ function LandingPage() {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [currentPage]); // Dependency array includes currentPage
+
+  const totalPages = Math.ceil(totalCount / dramasPerPage); // Calculate total pages
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -52,6 +65,7 @@ function LandingPage() {
           <div className="lg:w-1/6"/>
 
           <div className="w-full lg:w-5/6">
+            <div>
             <div>
               {isMobile ? (
                 <div className='block lg:hidden items-center justify-between'>
@@ -117,15 +131,30 @@ function LandingPage() {
               )}
             </div>
 
-            <div className={searchTerm ? "space-y-4" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"}>
-              {isMobile || !searchTerm ? 
-                dramas.map(drama => (
+              <div className={searchTerm ? "space-y-4" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"}>
+                {dramas.map(drama => (
                   <Card key={drama.id} drama={drama} />
-                )) : 
-                dramas.map(drama => (
-                  <Card key={drama.id} drama={drama} />
-                ))
-                }
+                ))}
+              </div>
+
+              {/* Pagination Buttons */}
+              <div className="flex justify-center space-x-2 mt-4">
+                <button
+                  className="bg-blue-400 text-white px-4 py-2 rounded"
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </button>
+                <span>{currentPage} / {totalPages}</span>
+                <button
+                  className="bg-blue-400 text-white px-4 py-2 rounded"
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </button>
+              </div>
             </div>
           </div>
         </div>

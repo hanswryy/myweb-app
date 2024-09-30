@@ -2,6 +2,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import bujank from "../images/bujank.jpg";
+import placeholder from "../images/placeholder.jpg";
 
 const Card = ({ drama }) => {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ const Card = ({ drama }) => {
       <div className="flex-shrink-0">
         <img
             className="w-full h-40 object-cover rounded-lg"
-            src={drama?.url_photo}
+            src={drama?.url_photo || }
           />
       </div>
       <div className="pt-2">

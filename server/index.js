@@ -9,7 +9,22 @@ app.get('/api', (req, res) => {
     res.json({ message: 'Hello from server!' });
 });
 
+// endpoint to get count of all dramas
+app.get('/count', (req, res) => {
+    pool.query('SELECT COUNT(*) FROM drama', (error, results) => {
+        if (error) {
+            console.error(error); // Log the error to the console
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        res.status(200).json(results.rows[0]);
+    });
+});
+
 app.get('/dramas', (req, res) => {
+    const page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
+    const limit = parseInt(req.query.limit) || 12; // Default to 12 items per page if not provided
+    const offset = (page - 1) * limit; // Calculate the offset for pagination
+
     const query = `
         SELECT 
             d.*,
@@ -21,15 +36,21 @@ app.get('/dramas', (req, res) => {
         JOIN 
             genre g ON dg.genre_id = g.id
         GROUP BY 
-            d.id;
-    `
-    pool.query(query, (error, results) => {
+            d.id
+        ORDER BY
+            d.title
+        LIMIT $1 OFFSET $2;  -- Use placeholders for query parameters
+    `;
+    
+    pool.query(query, [limit, offset], (error, results) => {
         if (error) {
-            throw error;
+            console.error(error); // Log the error to the console
+            return res.status(500).json({ error: 'Internal Server Error' });
         }
         res.status(200).json(results.rows);
     });
 });
+
 
 // get all users from users table
 app.get('/users', async (req, res) => {
