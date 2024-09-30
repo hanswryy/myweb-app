@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import Card from './components/Card';
-import SearchCard from './components/SearchCard'; 
+import SearchCard from './components/SearchCard';
+import DramaList from "./components/DramaList";
 import SideBarMain from './components/SideBarMain';
 
 function LandingPage() {
   const [searchTerm, setSearchTerm] = React.useState("");
   const [isMobile, setIsMobile] = useState(false);
+  const [dramas, setDramas] = useState([]);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
 
   useEffect(() => {
+    fetch("/dramas")
+      .then(response => response.json())
+      .then(data => setDramas(data))
+      .catch(error => console.error("Error fetching dramas:", error));
+
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
     };
@@ -111,19 +118,15 @@ function LandingPage() {
             </div>
 
             <div className={searchTerm ? "space-y-4" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"}>
-              {isMobile || !searchTerm ? <Card /> : <SearchCard />}
+              {isMobile || !searchTerm ? 
+                dramas.map(drama => (
+                  <Card key={drama.id} drama={drama} />
+                )) : 
+                dramas.map(drama => (
+                  <Card key={drama.id} drama={drama} />
+                ))
+                }
             </div>
-
-            {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              <Card />
-              <Card />
-              <Card />
-              <Card />
-              <Card />
-              <Card />
-              <Card />
-              <Card />
-            </div> */}
           </div>
         </div>
       </div>

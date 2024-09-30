@@ -4,7 +4,7 @@
   "description": "my new web app",
   "main": "index.js",
   "scripts": {
-    "start": "node server/windex.js",
+    "start": "node server/index.js",
     "test": "hello world"
   },
   "repository": {
