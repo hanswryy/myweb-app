@@ -1,21 +1,14 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 const SideBarCMS = ({ selectedOption }) => {
-    const [showDropdown, setShowDropdown] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-    const toggleDropdown = (event) => {
-        event.preventDefault();
-        setShowDropdown(!showDropdown);
-    };
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
 
     return (
-        <div>
+        <div className="flex h-0 lg:h-screen">
             {/* Hamburger Menu Button */}
             <button
                 className="lg:hidden p-2 focus:outline-none"
@@ -44,6 +37,8 @@ const SideBarCMS = ({ selectedOption }) => {
                     onClick={toggleSidebar}
                 ></div>
             )}
+
+            {/* Sidebar */}
             <div
                 className={`fixed top-0 left-0 h-full bg-gray-50 lg:bg-blue-200 z-50 transform ${
                     isSidebarOpen ? "translate-x-0" : "-translate-x-full"

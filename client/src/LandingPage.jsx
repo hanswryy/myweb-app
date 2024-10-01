@@ -10,22 +10,27 @@ function LandingPage() {
   const [totalCount, setTotalCount] = useState(0); // Total count state
   const dramasPerPage = 12; // Dramas per page
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+  const [filters, setFilters] = useState({
+    year: "",
+    genre: "",
+    platform: ""
+  });
 
   useEffect(() => {
     const fetchDramas = async () => {
-      const response = await fetch(`/dramas?page=${currentPage}&limit=${dramasPerPage}`);
+      const query = new URLSearchParams({
+        page: currentPage,
+        limit: dramasPerPage,
+        ...filters,
+      }).toString();
+
+      const response = await fetch(`/dramas?${query}`);
       const data = await response.json();
       setDramas(data); // Get dramas from API response
-    };
-
-    const fetchTotalCount = async () => {
-      const response = await fetch('/count');
-      const data = await response.json();
-      setTotalCount(data.count); // Get total count from API response
+      setTotalCount(data.total);
     };
 
     fetchDramas();
-    fetchTotalCount();
     
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -37,15 +42,27 @@ function LandingPage() {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [currentPage]); // Dependency array includes currentPage
+  }, [currentPage, filters]); // Dependency array includes currentPage
 
   const totalPages = Math.ceil(totalCount / dramasPerPage); // Calculate total pages
+
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setCurrentPage(1); // Reset to the first page when filters are applied
+  };
 
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="container mx-auto px-4 py-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold z-10">DramaKu</h1>
+        <div className="flex justify-end items-center mb-6">
           <div>
             <input
               type="text"
@@ -58,8 +75,9 @@ function LandingPage() {
         </div>
 
         <div className="flex space-x-4 mb-6">
-          <div className="w-1/5 hidden lg:block h-full absolute top-0 left-0 p-20 bg-blue-200">
-            <SideBarMain selectedOption="dramas"/>
+          <div className="w-1/5 hidden lg:block fixed top-0 left-0 p-20 bg-blue-200">
+            <h1 className="text-2xl font-bold z-10">DramaKu</h1>
+            <SideBarMain selectedOption="dramas" />
           </div>
 
           <div className="lg:w-1/6"/>
@@ -79,55 +97,151 @@ function LandingPage() {
                     </button>
                   </div>
                   {filtersExpanded && (
-                    <div className="flex flex-col space-y-2 mb-4">
-                      <select className="border border-gray-300 rounded px-4 py-2">
-                        <option>Year</option>
+                    <form className="flex flex-col space-y-2 mb-4" onSubmit={handleSubmit}>
+                      <select
+                        name="year"
+                        className="border border-gray-300 rounded px-4 py-2"
+                        value={filters.year}
+                        onChange={handleFilterChange}
+                      >
+                        <option value="">Year</option>
+                        {/* Add year options */}
+                        <option value="2021">2021</option>
+                        <option value="2020">2020</option>
+                        <option value="2019">2019</option>
                       </select>
-                      <select className="border border-gray-300 rounded px-4 py-2">
-                        <option>Genre</option>
+                      <select
+                        name="genre"
+                        className="border border-gray-300 rounded px-4 py-2"
+                        value={filters.genre}
+                        onChange={handleFilterChange}
+                      >
+                        <option value="">Genre</option>
+                        {/* Add genre options */}
+                        <option value="Action">Action</option>
+                        <option value="Comedy">Comedy</option>
+                        <option value="Drama">Drama</option>
                       </select>
-                      <select className="border border-gray-300 rounded px-4 py-2">
-                        <option>Status</option>
+                      <select
+                        name="status"
+                        className="border border-gray-300 rounded px-4 py-2"
+                        value={filters.status}
+                        onChange={handleFilterChange}
+                      >
+                        <option value="">Status</option>
+                        {/* Add status options */}
                       </select>
-                      <select className="border border-gray-300 rounded px-4 py-2">
-                        <option>Availability</option>
+                      <select
+                        name="availability"
+                        className="border border-gray-300 rounded px-4 py-2"
+                        value={filters.platform}
+                        onChange={handleFilterChange}
+                      >
+                        <option value="">Availability</option>
+                        {/* Add availability options */}
+                        <option value="Netflix">Netflix</option>
+                        <option value="Prime">Amazon Prime</option>
+                        <option value="Crunchyroll">Crunchyroll</option>
                       </select>
-                      <select className="border border-gray-300 rounded px-4 py-2">
-                        <option>Award</option>
+                      <select
+                        name="award"
+                        className="border border-gray-300 rounded px-4 py-2"
+                        value={filters.award}
+                        onChange={handleFilterChange}
+                      >
+                        <option value="">Award</option>
+                        {/* Add award options */}
                       </select>
-                      <select className="border border-gray-300 rounded px-4 py-2">
-                        <option>Sorted by: Alphabetics</option>
+                      <select
+                        name="sortBy"
+                        className="border border-gray-300 rounded px-4 py-2"
+                        value={filters.sortBy}
+                        onChange={handleFilterChange}
+                      >
+                        <option value="Alphabetics">Sorted by: Alphabetics</option>
+                        {/* Add other sorting options */}
                       </select>
-                      <button className="bg-blue-400 text-white px-4 py-2 rounded">
+                      <button
+                        className="bg-blue-400 text-white px-4 py-2 rounded"
+                        type="submit"
+                      >
                         Submit
                       </button>
-                    </div>
+                    </form>
                   )}
                 </div>
               ) : (
-                <div className="flex flex-row space-x-2 mb-4 flex-wrap">
-                  <select className="border border-gray-300 rounded px-4 py-2">
-                    <option>Year</option>
+                <form className="flex flex-row space-x-2 mb-4 flex-wrap" onSubmit={handleSubmit}>
+                  <select
+                    name="year"
+                    className="border border-gray-300 rounded px-4 py-2"
+                    value={filters.year}
+                    onChange={handleFilterChange}
+                  >
+                    <option value="">Year</option>
+                    {/* Add year options */}
+                    <option value="2021">2021</option>
+                    <option value="2020">2020</option>
+                    <option value="2019">2019</option>
                   </select>
-                  <select className="border border-gray-300 rounded px-4 py-2">
-                    <option>Genre</option>
+                  <select
+                    name="genre"
+                    className="border border-gray-300 rounded px-4 py-2"
+                    value={filters.genre}
+                    onChange={handleFilterChange}
+                  >
+                    <option value="">Genre</option>
+                    {/* Add genre options */}
+                    <option value="Action">Action</option>
+                    <option value="Comedy">Comedy</option>
+                    <option value="Drama">Drama</option>
                   </select>
-                  <select className="border border-gray-300 rounded px-4 py-2">
-                    <option>Status</option>
+                  <select
+                    name="status"
+                    className="border border-gray-300 rounded px-4 py-2"
+                    value={filters.status}
+                    onChange={handleFilterChange}
+                  >
+                    <option value="">Status</option>
+                    {/* Add status options */}
                   </select>
-                  <select className="border border-gray-300 rounded px-4 py-2">
-                    <option>Availability</option>
+                  <select
+                    name="availability"
+                    className="border border-gray-300 rounded px-4 py-2"
+                    value={filters.platform}
+                    onChange={handleFilterChange}
+                  >
+                    <option value="">Availability</option>
+                    {/* Add availability options */}
+                    <option value="Netflix">Netflix</option>
+                    <option value="Prime">Amazon Prime</option>
+                    <option value="Crunchyroll">Crunchyroll</option>
                   </select>
-                  <select className="border border-gray-300 rounded px-4 py-2">
-                    <option>Award</option>
+                  <select
+                    name="award"
+                    className="border border-gray-300 rounded px-4 py-2"
+                    value={filters.award}
+                    onChange={handleFilterChange}
+                  >
+                    <option value="">Award</option>
+                    {/* Add award options */}
                   </select>
-                  <select className="border border-gray-300 rounded px-4 py-2">
-                    <option>Sorted by: Alphabetics</option>
+                  <select
+                    name="sortBy"
+                    className="border border-gray-300 rounded px-4 py-2"
+                    value={filters.sortBy}
+                    onChange={handleFilterChange}
+                  >
+                    <option value="Alphabetics">Sorted by: Alphabetics</option>
+                    {/* Add other sorting options */}
                   </select>
-                  <button className="bg-blue-400 text-white px-4 py-2 rounded">
+                  <button
+                    className="bg-blue-400 text-white px-4 py-2 rounded"
+                    type="submit"
+                  >
                     Submit
                   </button>
-                </div>
+                </form>
               )}
             </div>
 
