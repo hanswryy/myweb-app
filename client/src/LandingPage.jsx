@@ -13,24 +13,30 @@ function LandingPage() {
   const [filters, setFilters] = useState({
     year: "",
     genre: "",
-    platform: ""
+    platform: "",
+    title: ""
   });
 
+
   useEffect(() => {
-    const fetchDramas = async () => {
+    const fetchDramasAndCount = async () => {
       const query = new URLSearchParams({
         page: currentPage,
         limit: dramasPerPage,
         ...filters,
       }).toString();
 
-      const response = await fetch(`/dramas?${query}`);
-      const data = await response.json();
-      setDramas(data); // Get dramas from API response
-      setTotalCount(data.total);
+      try {
+        const response = await fetch(`/dramas?${query}`);
+        const data = await response.json();
+        setDramas(data.dramas); // Update dramas from API response
+        setTotalCount(data.total); // Update total count from API response
+      } catch (error) {
+        console.error("Error fetching dramas:", error);
+      }
     };
 
-    fetchDramas();
+    fetchDramasAndCount();
     
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -45,12 +51,20 @@ function LandingPage() {
   }, [currentPage, filters]); // Dependency array includes currentPage
 
   const totalPages = Math.ceil(totalCount / dramasPerPage); // Calculate total pages
+  console.log(dramasPerPage);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters((prevFilters) => ({
       ...prevFilters,
       [name]: value,
+    }));
+  };
+
+  const handleSearchChange = (e) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      title: e.target.value,
     }));
   };
 
@@ -68,8 +82,8 @@ function LandingPage() {
               type="text"
               placeholder="Search Drama"
               className="border border-gray-300 rounded-full px-4 py-2 w-64"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={filters.title}
+              onChange={handleSearchChange}
             />
           </div>
         </div>
@@ -132,7 +146,7 @@ function LandingPage() {
                         {/* Add status options */}
                       </select>
                       <select
-                        name="availability"
+                        name="platform"
                         className="border border-gray-300 rounded px-4 py-2"
                         value={filters.platform}
                         onChange={handleFilterChange}
@@ -206,7 +220,7 @@ function LandingPage() {
                     {/* Add status options */}
                   </select>
                   <select
-                    name="availability"
+                    name="platform"
                     className="border border-gray-300 rounded px-4 py-2"
                     value={filters.platform}
                     onChange={handleFilterChange}
