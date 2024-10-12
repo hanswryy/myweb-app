@@ -1,9 +1,27 @@
-// server/index.js
+require('dotenv').config();
 
 const pool = require('./db');
 const express = require('express');
+const cors = require('cors');
 const PORT = process.env.PORT || 3001;
 const app = express();
+// Import bcrypt and jsonwebtoken
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+// Define the CORS options
+const corsOptions = {
+    credentials: true,
+    origin: ['http://localhost:3001', 'http://localhost:3000'] // Whitelist the domains you want to allow
+};
+
+app.use(cors(corsOptions)); // Use the cors middleware with your options
+
+// Middleware to parse JSON bodies
+app.use(express.json());
+
+// Middleware to parse urlencoded bodies
+app.use(express.urlencoded({ extended: true }));
 
 app.get('/api', (req, res) => {
     res.json({ message: 'Hello from server!' });
@@ -44,9 +62,7 @@ app.get('/dramas', (req, res) => {
         AND
             d.year ILIKE '%' || $4 || '%'
         AND
-            d.title ILIKE '%' || $6 || '%'
-        OR
-            d.actors ILIKE '%' || $6 || '%'
+            ($6 = '' OR (d.title ILIKE '%' || $6 || '%' OR d.actors ILIKE '%' || $6 || '%'))
         GROUP BY 
             d.id
         HAVING ($5 = '' OR $5 = ANY(ARRAY_AGG(g.genre)))
@@ -69,9 +85,7 @@ app.get('/dramas', (req, res) => {
         AND
             d.year ILIKE '%' || $2 || '%'
         AND
-            d.title ILIKE '%' || $4 || '%'
-        OR
-            d.actors ILIKE '%' || $4 || '%'
+            ($4 = '' OR (d.title ILIKE '%' || $4 || '%' OR d.actors ILIKE '%' || $4 || '%'))
         GROUP BY 
             d.id
         HAVING ($3 = '' OR $3 = ANY(ARRAY_AGG(g.genre)));
@@ -94,6 +108,38 @@ app.get('/dramas', (req, res) => {
     });
 });
 
+// Login endpoint
+app.post('/auth/login', async (req, res) => {
+    const { username, password } = req.body;
+
+    try {
+        // Check if user exists
+        const user = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        if (user.rows.length === 0) {
+            return res.status(400).json({ error: 'Invalid credentials' });
+        }
+
+        // Compare password
+        const isMatch = await bcrypt.compare(password, user.rows[0].password);
+        if (!isMatch) {
+            return res.status(400).json({ error: 'Invalid credentials' });
+        }
+
+        console.log(process.env.JWT_SECRET);
+
+        // Create and sign JWT
+        const token = jwt.sign(
+            { id: user.rows[0].id, username: user.rows[0].username, role: user.rows[0].role },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' } // Token expires in 1 hour
+        );
+
+        res.json({ token });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 // get all users from users table
 app.get('/users', async (req, res) => {

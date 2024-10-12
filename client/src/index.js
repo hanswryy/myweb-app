@@ -13,6 +13,7 @@ import CMSAwards from './CMSAwards';
 import CMSGenres from './CMSGenres';
 import CMSActors from './CMSActors';
 import CMSUsers from './CMSUsers';
+import Login from './Login';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -29,6 +30,7 @@ root.render(
         <Route path="/cms/genres" element={<CMSGenres />} />
         <Route path="/cms/actors" element={<CMSActors />} />
         <Route path="/cms/users" element={<CMSUsers />} />
+        <Route path="/login" element={<Login />} />
       </Routes>
     </Router>
   </React.StrictMode>

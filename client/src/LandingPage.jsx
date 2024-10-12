@@ -51,7 +51,6 @@ function LandingPage() {
   }, [currentPage, filters]); // Dependency array includes currentPage
 
   const totalPages = Math.ceil(totalCount / dramasPerPage); // Calculate total pages
-  console.log(dramasPerPage);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
