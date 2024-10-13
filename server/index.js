@@ -108,6 +108,52 @@ app.get('/dramas', (req, res) => {
     });
 });
 
+// Endpoint untuk mengambil drama berdasarkan ID
+app.get('/dramas/:id', (req, res) => {
+    // Mengambil drama id dari parameter URL dan memvalidasinya
+    const dramaId = parseInt(req.params.id, 10);
+    console.log(`Fetching drama with ID: ${dramaId}`); 
+    if (isNaN(dramaId)) {
+        return res.status(400).json({ error: 'Invalid drama ID' }); // Mengembalikan 400 jika ID tidak valid
+    }
+
+    const query = `
+        SELECT 
+            d.*, 
+            ARRAY_AGG(DISTINCT g.genre) AS genres,
+            ARRAY_AGG(DISTINCT jsonb_build_object('id', a.id, 'name', a.name, 'country_id', a.country_id, 'birth_date', a.birth_date, 'url_photo', a.url_photo)) AS actors
+        FROM 
+            dramav2 d
+        JOIN 
+            drama_genre dg ON d.id = dg.drama_id
+        JOIN 
+            genre g ON dg.genre_id = g.id
+        JOIN 
+            drama_actor da ON d.id = da.drama_id
+        JOIN 
+            actor a ON da.actor_id = a.id
+        WHERE 
+            d.id = $1
+        GROUP BY 
+            d.id;
+    `;
+    console.log('Executing query:', query, 'with ID:', dramaId);
+
+    pool.query(query, [dramaId], (error, results) => {
+        if (error) {
+            console.error(error); // Log the error to the console
+            return res.status(500).json({ error: 'Internal Server Error' }); // Mengembalikan 500 jika ada kesalahan server
+        }
+
+        if (results.rows.length === 0) {
+            return res.status(404).json({ error: 'Drama not found' }); // Mengembalikan 404 jika drama tidak ditemukan
+        }
+
+        res.status(200).json(results.rows[0]); // Mengembalikan data drama yang ditemukan
+    });
+});
+
+
 // Login endpoint
 app.post('/auth/login', async (req, res) => {
     const { username, password } = req.body;

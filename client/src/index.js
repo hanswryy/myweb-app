@@ -21,7 +21,7 @@ root.render(
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/detailPage" element={<DetailPage />} />
+        <Route path="/detailDrama/:id" element={<DetailPage />} />
         <Route path="/cms" element={<CMSDrama />} />
         <Route path="/cms/input" element={<CMSInputDrama />} />
         <Route path="/cms/countries" element={<CMSCountries />} />

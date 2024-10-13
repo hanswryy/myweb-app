@@ -7,7 +7,7 @@ const Card = ({ drama }) => {
 
   // Function to handle card click
   const handleClick = () => {
-    navigate(`/detailPage/${drama?.id}`);
+    navigate(`/detailDrama/${drama?.id}`);
   };
 
   // Fallback to placeholder image if the drama image fails to load
