@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google'; // Importing the required components
 import './Login.css';
 
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-
   const navigate = useNavigate();
+
+  console.log('REACT_APP_GOOGLE_CLIENT_ID:', process.env.REACT_APP_GOOGLE_CLIENT_ID);
 
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent the default form submission
@@ -41,6 +43,36 @@ function Login() {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    console.log('Google login successful!', credentialResponse);
+    
+    // Send the Google token to your backend for verification
+    const res = await fetch('http://localhost:3001/auth/google', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        idToken: credentialResponse.credential, // Get the token from the response
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      // Store the token and navigate on success
+      localStorage.setItem('token', data.token);
+      navigate('/');
+    } else {
+      setErrorMessage(data.error || 'Failed to login with Google. Please try again.');
+    }
+  };
+
+  const handleGoogleFailure = (error) => {
+    console.error('Google login failed:', error);
+    setErrorMessage('Google login failed. Please try again.');
+  };
+
   return (
     <div className="login-container">
       {/* Centering the login-box */}
@@ -71,8 +103,14 @@ function Login() {
             />
           </div>
           <button type="submit" className="btn login-btn">Sign in</button>
-          <button type="button" className="btn google-btn">Sign in with Google</button>
         </form>
+
+        <GoogleLogin className="p-4"
+          onSuccess={handleGoogleSuccess}
+          onFailure={handleGoogleFailure}
+          style={{ marginTop: '10px' }}
+        />
+        
         <div className="mt-6 text-center">
           <a href="#" className="text-sm text-blue-600 hover:underline">Forgot your password?</a>
         </div>
@@ -85,4 +123,12 @@ function Login() {
   );
 }
 
-export default Login;
+// Wrap your application with GoogleOAuthProvider in the main index file (e.g., index.js)
+const App = () => (
+  <GoogleOAuthProvider clientId={"325515720074-ui0c79kuoe3fto2376gs6k9s3arllm8j.apps.googleusercontent.com"}>
+    <Login />
+  </GoogleOAuthProvider>
+);
+
+
+export default App;

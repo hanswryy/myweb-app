@@ -66,15 +66,63 @@ const SideBarCMS = ({ selectedOption }) => {
                             href="/"
                             className={selectedOption === 'korea' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
                         >
-                            Korea
+                            South Korea
                         </a>
                     </li>
                     <li>
                         <a
                             href="/"
-                            className={selectedOption === 'china' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
+                            className={selectedOption === 'indonesia' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
                         >
-                            China
+                            Indonesia
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="/"
+                            className={selectedOption === 'us' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
+                        >
+                            United States
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="/"
+                            className={selectedOption === 'england' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
+                        >
+                            England
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="/"
+                            className={selectedOption === 'taiwan' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
+                        >
+                            Taiwan
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="/"
+                            className={selectedOption === 'germany' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
+                        >
+                            Germany
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="/"
+                            className={selectedOption === 'india' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
+                        >
+                            India
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="/"
+                            className={selectedOption === 'thailand' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
+                        >
+                            Thailand
                         </a>
                     </li>
                 </ul>
