@@ -129,12 +129,43 @@ app.post('/auth/login', async (req, res) => {
 
         // Create and sign JWT
         const token = jwt.sign(
-            { id: user.rows[0].id, username: user.rows[0].username, role: user.rows[0].role },
+            { id: user.rows[0].id, username: user.rows[0].username, role: user.rows[0].role_id },
             process.env.JWT_SECRET,
             { expiresIn: '1h' } // Token expires in 1 hour
         );
 
         res.json({ token });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// endpoint to register new user to users table (params: username, password, email), role_id will always be 1
+app.post('/auth/register', async (req, res) => {
+    const { username, password, email } = req.body;
+
+    try {
+        // Check if user already exists
+        const user = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        if (user.rows.length > 0) {
+            return res.status(400).json({ error: 'User already exists' });
+        }
+
+        // Hash password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // Create date of now to fill created_at column
+        const date = new Date();
+
+        // Insert new user into users table
+        const newUser = await pool.query(
+            'INSERT INTO users (username, password, email, role_id, created_at) VALUES ($1, $2, $3, 1, $4) RETURNING *',
+            [username, hashedPassword, email, date]
+        );
+
+        res.json(newUser.rows[0]);
     } catch (error) {
         console.error(error.message);
         res.status(500).json({ error: 'Internal Server Error' });

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Card from './components/Card';
 import SideBarMain from './components/SideBarMain';
+// import jwt decode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
+import { useNavigate } from 'react-router-dom';
 
 function LandingPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -16,7 +19,23 @@ function LandingPage() {
     platform: "",
     title: ""
   });
+  const [role, setRole] = useState(null); // Role of the user
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // User logged in state
 
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        setRole(decodedToken.role); // Extract role from token
+        setIsLoggedIn(true); // Set user as logged in
+      } catch (error) {
+        console.error("Invalid token");
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const fetchDramasAndCount = async () => {
@@ -72,19 +91,64 @@ function LandingPage() {
     setCurrentPage(1); // Reset to the first page when filters are applied
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
+    setRole(null);
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="container mx-auto px-4 py-6">
-        <div className="flex justify-end items-center mb-6">
-          <div>
-            <input
-              type="text"
-              placeholder="Search Drama"
-              className="border border-gray-300 rounded-full px-4 py-2 w-64"
-              value={filters.title}
-              onChange={handleSearchChange}
-            />
-          </div>
+        <div className="flex justify-end items-center mb-6 space-x-4">
+          {!isLoggedIn ? (
+            <>
+              <button
+                className="bg-blue-400 text-white px-4 py-2 rounded"
+                onClick={() => navigate('/login')}
+              >
+                Login
+              </button>
+              <button
+                className="bg-green-400 text-white px-4 py-2 rounded"
+                onClick={() => navigate('/register')}
+              >
+                Register
+              </button>
+            </>
+          ) : (
+            <>
+              {role === 0 && (
+                <button
+                  className="bg-yellow-400 text-white px-4 py-2 rounded"
+                  onClick={() => navigate('/cms')}
+                >
+                  CMS
+                </button>
+              )}
+              {role === 1 && (
+                <button
+                  className="bg-purple-400 text-white px-4 py-2 rounded"
+                  onClick={() => navigate('/watchlist')}
+                >
+                  Watchlist
+                </button>
+              )}
+              <button
+                className="bg-red-400 text-white px-4 py-2 rounded"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+            </>
+          )}
+          <input
+            type="text"
+            placeholder="Search Drama"
+            className="border border-gray-300 rounded-full px-4 py-2 w-64"
+            value={filters.title}
+            onChange={handleSearchChange}
+          />
         </div>
 
         <div className="flex space-x-4 mb-6">
