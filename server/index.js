@@ -181,8 +181,13 @@ app.post('/auth/google', async (req, res) => {
 
         // If we reach here, it means the user exists but has no password,
         // and we can optionally provide a response or redirect.
-        res.status(400).json({ error: 'Unable to log in. Please use the regular login method for existing accounts.' });
-
+        // sign jwt for the user with id and username and role
+        const token = jwt.sign(
+            { id: user.rows[0].id, username: user.rows[0].username, role: user.rows[0].role_id },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+        res.json({ token });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });

@@ -64,7 +64,7 @@ root.render(
   <Router>
     <Routes>
       <Route path="/" element={<LandingPage />} />
-      <Route path="/detailPage" element={<DetailPage />} />
+      <Route path="/detailDrama/:id" element={<DetailPage />} />
       <Route 
         path="/cms" 
         element={
