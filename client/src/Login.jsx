@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Login.css';
 
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent the default form submission
@@ -31,6 +34,7 @@ function Login() {
       localStorage.setItem('token', token);
       // Redirect to the dashboard or another page after successful login
       console.log('Login successful!', token);
+      navigate('/');
     } catch (error) {
       console.error('Error during login:', error);
       setErrorMessage('An error occurred. Please try again later.');
@@ -74,7 +78,7 @@ function Login() {
         </div>
         <div className="mt-2 text-center">
           <span className="text-sm text-gray-700">Don't have an account?</span>
-          <a href="/registrasi" className="text-sm text-blue-600 hover:underline"> Register</a>
+          <a href="/register" className="text-sm text-blue-600 hover:underline"> Register</a>
         </div>
       </div>
     </div>
