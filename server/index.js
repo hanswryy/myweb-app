@@ -8,6 +8,17 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
 
+var validator = require('validator');
+
+function escapeHTML(str) {
+    return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+}
+
 // Initialize Google OAuth2 client with your client ID
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -92,8 +103,10 @@ app.get('/dramas/:id', (req, res) => {
     // Mengambil drama id dari parameter URL dan memvalidasinya
     const dramaId = parseInt(req.params.id, 10);
     console.log(`Fetching drama with ID: ${dramaId}`); 
+
+    // use isNan from js to check if dramaId is an integer
     if (isNaN(dramaId)) {
-        return res.status(400).json({ error: 'Invalid drama ID' }); // Mengembalikan 400 jika ID tidak valid
+        return res.status(400).json({ error: 'Invalid drama ID' });
     }
 
     const query = `
@@ -135,6 +148,11 @@ app.get('/dramas/:id', (req, res) => {
 // Endpoint to toggle the watchlist status
 app.post('/watchlist/toggle', async (req, res) => {
     const { user_id, drama_id } = req.body;
+
+    // check if user_id and drama_id are integers with isNaN from js
+    if (isNaN(user_id) || isNaN(drama_id)) {
+        return res.status(400).json({ error: 'Invalid user or drama ID' });
+    }
   
     try {
       const result = await pool.query(
@@ -166,6 +184,11 @@ app.post('/watchlist/toggle', async (req, res) => {
 // create an endpoint to get the user's watchlist from table user_watchlist, just get the list of drama_id
 app.get('/watchlist/check', async (req, res) => {
     const { user_id, drama_id } = req.query; // Get user and drama IDs from query params
+
+    // check if user_id and drama_id are integers with isNaN from js
+    if (isNaN(user_id) || isNaN(drama_id)) {
+        return res.status(400).json({ error: 'Invalid user or drama ID' });
+    }
   
     try {
       const result = await pool.query(
@@ -188,6 +211,11 @@ app.get('/watchlist/check', async (req, res) => {
   // Endpoint to fetch all dramas watchlisted by the user
 app.get('/watchlist', async (req, res) => {
     const { user_id } = req.query; // Get user ID from query params
+
+    // check if user_id is an integer with isNaN from js
+    if (isNaN(user_id)) {
+        return res.status(400).json({ error: 'Invalid user ID' });
+    }
   
     try {
       const result = await pool.query(
@@ -268,13 +296,26 @@ app.post('/auth/google', async (req, res) => {
 app.post('/auth/login', async (req, res) => {
     const { username, password } = req.body;
 
+    // sanitize input
+    if (!validator.isAlphanumeric(username)) {
+        return res.status(400).json({ error: 'Invalid username' });
+    }
+    // check if password is empty
+    if (!password) {
+        return res.status(400).json({ error: 'Password is required' });
+    }
+
+    // sanitize username and password from escapeHTML
+    const sanitizedUsername = escapeHTML(username);
+    const sanitizedPassword = escapeHTML(password);
+
     try {
-        const user = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        const user = await pool.query('SELECT * FROM users WHERE username = $1', [sanitizedUsername]);
         if (user.rows.length === 0) {
             return res.status(400).json({ error: 'Invalid credentials' });
         }
 
-        const isMatch = await bcrypt.compare(password, user.rows[0].password);
+        const isMatch = await bcrypt.compare(sanitizedPassword, user.rows[0].password);
         if (!isMatch) {
             return res.status(400).json({ error: 'Invalid credentials' });
         }
@@ -296,24 +337,42 @@ app.post('/auth/login', async (req, res) => {
 app.post('/auth/register', async (req, res) => {
     const { username, password, email } = req.body;
 
+    // sanitize input
+    if (!validator.isAlphanumeric(username)) {
+        return res.status(400).json({ error: 'Invalid username' });
+    }
+    // check if password length is less than 8
+    if (password.length < 8) {
+        return res.status(400).json({ error: 'Password must be at least 8 characters long' });
+    }
+    // check email
+    if (!validator.isEmail(email)) {
+        return res.status(400).json({ error: 'Invalid email' });
+    }
+
+    // sanitize username and password from escapeHTML
+    const sanitizedUsername = escapeHTML(username);
+    const sanitizedPassword = escapeHTML(password);
+    const sanitizedEmail = escapeHTML(email);
+
     try {
-        const user = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        const user = await pool.query('SELECT * FROM users WHERE username = $1', [sanitizedUsername]);
         if (user.rows.length > 0) {
             return res.status(400).json({ error: 'User already exists' });
         }
 
         // check if password is empty
-        if (!password) {
+        if (!sanitizedPassword) {
             return res.status(400).json({ error: 'Password is required' });
         }
 
         const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        const hashedPassword = await bcrypt.hash(sanitizedPassword, salt);
         const date = new Date();
 
         const newUser = await pool.query(
             'INSERT INTO users (username, password, email, role_id, created_at) VALUES ($1, $2, $3, 1, $4) RETURNING *',
-            [username, hashedPassword, email, date]
+            [sanitizedUsername, hashedPassword, sanitizedEmail, date]
         );
 
         res.json(newUser.rows[0]);
