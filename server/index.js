@@ -132,6 +132,76 @@ app.get('/dramas/:id', (req, res) => {
     });
 });
 
+// Endpoint to toggle the watchlist status
+app.post('/watchlist/toggle', async (req, res) => {
+    const { user_id, drama_id } = req.body;
+  
+    try {
+      const result = await pool.query(
+        'SELECT * FROM user_watchlist WHERE user_id = $1 AND drama_id = $2',
+        [user_id, drama_id]
+      );
+  
+      if (result.rows.length > 0) {
+        // Drama is already in watchlist, remove it
+        await pool.query(
+          'DELETE FROM user_watchlist WHERE user_id = $1 AND drama_id = $2',
+          [user_id, drama_id]
+        );
+        return res.json({ message: 'Removed from watchlist' });
+      } else {
+        // Drama is not in watchlist, add it
+        await pool.query(
+          'INSERT INTO user_watchlist (user_id, drama_id) VALUES ($1, $2)',
+          [user_id, drama_id]
+        );
+        return res.json({ message: 'Added to watchlist' });
+      }
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+  
+// create an endpoint to get the user's watchlist from table user_watchlist, just get the list of drama_id
+app.get('/watchlist/check', async (req, res) => {
+    const { user_id, drama_id } = req.query; // Get user and drama IDs from query params
+  
+    try {
+      const result = await pool.query(
+        'SELECT * FROM user_watchlist WHERE user_id = $1 AND drama_id = $2',
+        [user_id, drama_id]
+      );
+  
+      // If a record exists, the drama is already watchlisted
+      if (result.rows.length > 0) {
+        return res.json({ isWatchlisted: true });
+      } else {
+        return res.json({ isWatchlisted: false });
+      }
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+  // Endpoint to fetch all dramas watchlisted by the user
+app.get('/watchlist', async (req, res) => {
+    const { user_id } = req.query; // Get user ID from query params
+  
+    try {
+      const result = await pool.query(
+        'SELECT d.* FROM dramav2 d INNER JOIN user_watchlist w ON d.id = w.drama_id WHERE w.user_id = $1',
+        [user_id]
+      );
+  
+      return res.json(result.rows); // Return the watchlisted dramas
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
 
 // Google authentication endpoint
 app.post('/auth/google', async (req, res) => {

@@ -24,6 +24,7 @@ const DramaList = () => {
         fetchDramas();
     }, [currentPage]);
 
+
     const totalPages = Math.ceil(totalCount / dramasPerPage);
 
     return (
@@ -31,7 +32,7 @@ const DramaList = () => {
             <h1>Dramas</h1>
             <div className="drama-list">
                 {dramas.map(drama => (
-                    <Card key={drama.id} drama={drama} />
+                    <Card key={drama.id} drama={drama} user={userID} />
                 ))}
             </div>
             <div className="pagination">

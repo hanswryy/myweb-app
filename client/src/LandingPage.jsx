@@ -20,6 +20,7 @@ function LandingPage() {
     title: ""
   });
   const [role, setRole] = useState(null); // Role of the user
+  const [userID, setUserID] = useState(null); // User ID
   const [isLoggedIn, setIsLoggedIn] = useState(false); // User logged in state
 
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ function LandingPage() {
       try {
         const decodedToken = jwtDecode(token);
         setRole(decodedToken.role); // Extract role from token
+        setUserID(decodedToken.id); // Extract user ID from token
         setIsLoggedIn(true); // Set user as logged in
       } catch (error) {
         console.error("Invalid token");
@@ -95,6 +97,7 @@ function LandingPage() {
     localStorage.removeItem('token');
     setIsLoggedIn(false);
     setRole(null);
+    window.location.reload();
   };
 
   return (
@@ -324,7 +327,7 @@ function LandingPage() {
 
               <div className={searchTerm ? "space-y-4" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"}>
                 {dramas.map(drama => (
-                  <Card key={drama.id} drama={drama} />
+                  <Card key={drama.id} drama={drama} user={userID} />
                 ))}
               </div>
 

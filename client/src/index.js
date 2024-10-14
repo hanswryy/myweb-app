@@ -18,6 +18,7 @@ import CMSActors from './CMSActors';
 import CMSUsers from './CMSUsers';
 import Login from './Login';
 import Register from './Registrasi';
+import WatchlistPage from './WatchList';
 
 const ProtectedRoute = ({ children, requiredRole }) => {
   const [isAuthorized, setIsAuthorized] = useState(null); // Use 'null' as initial state to indicate loading
@@ -82,6 +83,7 @@ root.render(
       <Route path="/cms/users" element={<CMSUsers />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/watchlist" element={<WatchlistPage/>} />
     </Routes>
   </Router>
 );
