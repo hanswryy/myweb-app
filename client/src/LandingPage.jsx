@@ -202,15 +202,14 @@ function LandingPage() {
                         <option value="Comedy">Comedy</option>
                         <option value="Drama">Drama</option>
                       </select>
-                      <select
+                      {/* <select
                         name="status"
                         className="border border-gray-300 rounded px-4 py-2"
                         value={filters.status}
                         onChange={handleFilterChange}
                       >
                         <option value="">Status</option>
-                        {/* Add status options */}
-                      </select>
+                      </select> */}
                       <select
                         name="platform"
                         className="border border-gray-300 rounded px-4 py-2"
@@ -223,30 +222,28 @@ function LandingPage() {
                         <option value="Prime">Amazon Prime</option>
                         <option value="Crunchyroll">Crunchyroll</option>
                       </select>
-                      <select
+                      {/* <select
                         name="award"
                         className="border border-gray-300 rounded px-4 py-2"
                         value={filters.award}
                         onChange={handleFilterChange}
                       >
                         <option value="">Award</option>
-                        {/* Add award options */}
-                      </select>
-                      <select
+                      </select> */}
+                      {/* <select
                         name="sortBy"
                         className="border border-gray-300 rounded px-4 py-2"
                         value={filters.sortBy}
                         onChange={handleFilterChange}
                       >
-                        <option value="Alphabetics">Sorted by: Alphabetics</option>
-                        {/* Add other sorting options */}
-                      </select>
-                      <button
+                        <option value="Alphabetics">Sorted by: Alphabetics</option>\
+                      </select> */}
+                      {/* <button
                         className="bg-blue-400 text-white px-4 py-2 rounded"
                         type="submit"
                       >
                         Submit
-                      </button>
+                      </button> */}
                     </form>
                   )}
                 </div>
@@ -276,15 +273,14 @@ function LandingPage() {
                     <option value="Comedy">Comedy</option>
                     <option value="Drama">Drama</option>
                   </select>
-                  <select
+                  {/* <select
                     name="status"
                     className="border border-gray-300 rounded px-4 py-2"
                     value={filters.status}
                     onChange={handleFilterChange}
                   >
                     <option value="">Status</option>
-                    {/* Add status options */}
-                  </select>
+                  </select> */}
                   <select
                     name="platform"
                     className="border border-gray-300 rounded px-4 py-2"
@@ -297,30 +293,28 @@ function LandingPage() {
                     <option value="Prime">Amazon Prime</option>
                     <option value="Crunchyroll">Crunchyroll</option>
                   </select>
-                  <select
+                  {/* <select
                     name="award"
                     className="border border-gray-300 rounded px-4 py-2"
                     value={filters.award}
                     onChange={handleFilterChange}
                   >
                     <option value="">Award</option>
-                    {/* Add award options */}
-                  </select>
-                  <select
+                  </select> */}
+                  {/* <select
                     name="sortBy"
                     className="border border-gray-300 rounded px-4 py-2"
                     value={filters.sortBy}
                     onChange={handleFilterChange}
                   >
-                    <option value="Alphabetics">Sorted by: Alphabetics</option>
-                    {/* Add other sorting options */}
-                  </select>
-                  <button
+                    <option value="Alphabetics">Sorted by: Alphabetics</option>\
+                  </select> */}
+                  {/* <button
                     className="bg-blue-400 text-white px-4 py-2 rounded"
                     type="submit"
                   >
                     Submit
-                  </button>
+                  </button> */}
                 </form>
               )}
             </div>

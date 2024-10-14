@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 
-const SideBarCMS = ({ selectedOption }) => {
+const SideBarCMS = ({ selectedOption, onOptionChange }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
+
+    const handleOptionChange = (option) => {
+        onOptionChange(option);
+    }
 
     return (
         <div className="flex h-0 lg:h-screen">
@@ -46,85 +50,85 @@ const SideBarCMS = ({ selectedOption }) => {
             >
                 <ul className="space-y-2 p-4">
                     <li>
-                        <a
-                            href="/"
+                        <button
+                            onClick={() => handleOptionChange('all')}
                             className={selectedOption === 'dramas' ? "text-lg font-bold" : "text-lg"}
                         >
                             All Dramas
-                        </a>
+                        </button>
                     </li>
-                    <li>
-                        <a
-                            href="/"
-                            className={selectedOption === 'japan' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
+                    {/* <li>
+                        <button
+                            onClick={() => handleOptionChange('3')}
+                            className={selectedOption === '3' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
                         >
                             Japan
-                        </a>
+                        </button>
                     </li>
                     <li>
-                        <a
-                            href="/"
-                            className={selectedOption === 'korea' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
+                        <button
+                            onClick={() => handleOptionChange('0')}
+                            className={selectedOption === '0' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
                         >
                             South Korea
-                        </a>
+                        </button>
                     </li>
                     <li>
-                        <a
-                            href="/"
-                            className={selectedOption === 'indonesia' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
+                        <button
+                            onClick={() => handleOptionChange('2')}
+                            className={selectedOption === '2' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
                         >
                             Indonesia
-                        </a>
+                        </button>
                     </li>
                     <li>
-                        <a
-                            href="/"
-                            className={selectedOption === 'us' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
+                        <button
+                            onClick={() => handleOptionChange('1')}
+                            className={selectedOption === '1' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
                         >
                             United States
-                        </a>
+                        </button>
                     </li>
                     <li>
-                        <a
-                            href="/"
-                            className={selectedOption === 'england' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
+                        <button
+                            onClick={() => handleOptionChange('4')}
+                            className={selectedOption === '4' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
                         >
                             England
-                        </a>
+                        </button>
                     </li>
                     <li>
-                        <a
-                            href="/"
-                            className={selectedOption === 'taiwan' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
+                        <button
+                            onClick={() => handleOptionChange('5')}
+                            className={selectedOption === '5' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
                         >
                             Taiwan
-                        </a>
+                        </button>
                     </li>
                     <li>
-                        <a
-                            href="/"
-                            className={selectedOption === 'germany' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
+                        <button
+                            onClick={() => handleOptionChange('6')}
+                            className={selectedOption === '6' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
                         >
                             Germany
-                        </a>
+                        </button>
                     </li>
                     <li>
-                        <a
-                            href="/"
-                            className={selectedOption === 'india' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
+                        <button
+                            onClick={() => handleOptionChange('7')}
+                            className={selectedOption === '7' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
                         >
                             India
-                        </a>
+                        </button>
                     </li>
                     <li>
-                        <a
-                            href="/"
-                            className={selectedOption === 'thailand' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
+                        <button
+                            onClick={() => handleOptionChange('8')}
+                            className={selectedOption === '8' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
                         >
                             Thailand
-                        </a>
-                    </li>
+                        </button>
+                    </li> */}
                 </ul>
             </div>
         </div>
