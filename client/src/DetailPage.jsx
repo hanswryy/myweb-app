@@ -107,7 +107,7 @@
 // export default DetailPage;
 
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom'; // Import useParams untuk mengambil ID dari URL
+import { useParams, Link } from 'react-router-dom'; // Import useParams untuk mengambil ID dari URL
 import Actor from './components/Actor';
 import Review from './components/Review'; // Jika Anda menggunakan Review, tetap masukkan ini
 
@@ -178,8 +178,12 @@ function DetailPage() {
     return (
         <div className="bg-gray-50">
             <div className="container mx-auto px-4 py-6">
-                <div className="flex justify-between items-center mb-6">
+                {/* <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl font-bold">DramaKu</h1>
+                </div> */}
+                {/* create linked DramaKu title */}
+                <div className='flex justify-between items-center mb-'>
+                    <Link to="/" className="text-2xl font-bold">DramaKu</Link>
                 </div>
                 <div className="mx-auto lg:w-2/3">
                     <div className="flex flex-col lg:flex-row mb-6">

@@ -3,7 +3,7 @@ import Card from './components/Card';
 import SideBarMain from './components/SideBarMain';
 // import jwt decode from 'jwt-decode';
 import { jwtDecode } from 'jwt-decode';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 function LandingPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -156,7 +156,7 @@ function LandingPage() {
 
         <div className="flex space-x-4 mb-6">
           <div className="w-1/5 hidden lg:block fixed top-0 left-0 p-20 bg-blue-200">
-            <h1 className="text-2xl font-bold z-10">DramaKu</h1>
+            <Link className="text-2xl font-bold z-10" onClick={"/"}>DramaKu</Link>
             <SideBarMain selectedOption="dramas" />
           </div>
 

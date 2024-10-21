@@ -113,16 +113,16 @@ app.get('/dramas/:id', (req, res) => {
         SELECT 
             d.*, 
             ARRAY_AGG(DISTINCT g.genre) AS genres,
-            ARRAY_AGG(DISTINCT jsonb_build_object('id', a.id, 'name', a.name, 'country_id', a.country_id, 'birth_date', a.birth_date, 'url_photo', a.url_photo)) AS actors
+            ARRAY_AGG(DISTINCT jsonb_build_object('id', a.id, 'name', a.name, 'country_id', a.country_id, 'birth_date', a.birth_date, 'url_photo', a.url_photo)) FILTER (WHERE a.id IS NOT NULL) AS actors
         FROM 
             dramav2 d
         JOIN 
             drama_genre dg ON d.id = dg.drama_id
         JOIN 
             genre g ON dg.genre_id = g.id
-        JOIN 
+        LEFT JOIN 
             drama_actor da ON d.id = da.drama_id
-        JOIN 
+        LEFT JOIN 
             actor a ON da.actor_id = a.id
         WHERE 
             d.id = $1
