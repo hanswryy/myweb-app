@@ -8,7 +8,7 @@ const SideBarCMS = ({ selectedOption, onOptionChange }) => {
     };
 
     const handleOptionChange = (option) => {
-        onOptionChange(option);
+        
     }
 
     return (
@@ -57,7 +57,7 @@ const SideBarCMS = ({ selectedOption, onOptionChange }) => {
                             All Dramas
                         </button>
                     </li>
-                    {/* <li>
+                    <li>
                         <button
                             onClick={() => handleOptionChange('3')}
                             className={selectedOption === '3' ? "text-lg font-bold ml-4" : "text-lg ml-4"}
@@ -128,7 +128,7 @@ const SideBarCMS = ({ selectedOption, onOptionChange }) => {
                         >
                             Thailand
                         </button>
-                    </li> */}
+                    </li>
                 </ul>
             </div>
         </div>
