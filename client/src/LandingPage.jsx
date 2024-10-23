@@ -17,7 +17,8 @@ function LandingPage() {
     year: "",
     genre: "",
     platform: "",
-    title: ""
+    title: "",
+    country_id: "",
   });
   const [role, setRole] = useState(null); // Role of the user
   const [userID, setUserID] = useState(null); // User ID

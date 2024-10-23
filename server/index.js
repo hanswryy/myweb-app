@@ -66,7 +66,7 @@ app.get('/dramas', (req, res) => {
         WHERE d.availability ILIKE '%' || $3 || '%'
         AND d.year ILIKE '%' || $4 || '%'
         AND ($6 = '' OR (d.title ILIKE '%' || $6 || '%' OR d.actors ILIKE '%' || $6 || '%'))
-        AND ($7 IS NULL OR d.country_id = $7)
+        AND ($7::int IS NULL OR d.country_id = $7::int)
         GROUP BY d.id
         HAVING ($5 = '' OR $5 = ANY(ARRAY_AGG(g.genre)))
         ORDER BY d.title
@@ -81,7 +81,7 @@ app.get('/dramas', (req, res) => {
         WHERE d.availability ILIKE '%' || $1 || '%'
         AND d.year ILIKE '%' || $2 || '%'
         AND ($4 = '' OR (d.title ILIKE '%' || $4 || '%' OR d.actors ILIKE '%' || $4 || '%'))
-        AND ($5 IS NULL OR d.country_id = $5)
+        AND ($5::int IS NULL OR d.country_id = $5::int)
         GROUP BY d.id
         HAVING ($3 = '' OR $3 = ANY(ARRAY_AGG(g.genre)));
     `;
