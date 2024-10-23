@@ -7,6 +7,8 @@ import { useNavigate, Link } from 'react-router-dom';
 
 function LandingPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [years, setYears] = useState([]);
+  const [genres, setGenres] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
   const [dramas, setDramas] = useState([]);
   const [currentPage, setCurrentPage] = useState(1); // Current page state
@@ -75,11 +77,18 @@ function LandingPage() {
   const totalPages = Math.ceil(totalCount / dramasPerPage); // Calculate total pages
 
   const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      [name]: value,
-    }));
+    if (e.target) {
+      const { name, value } = e.target;
+      setFilters((prevFilters) => ({
+        ...prevFilters,
+        [name]: value,
+      }));
+    } else {
+      setFilters((prevFilters) => ({
+        ...prevFilters,
+        country_id: e,
+      }));
+    }
   };
 
   const handleSearchChange = (e) => {
@@ -100,6 +109,49 @@ function LandingPage() {
     setRole(null);
     window.location.reload();
   };
+
+  const [selectedOption, setSelectedOption] = useState("");
+
+  useEffect(() => {
+    handleFilterChange(selectedOption);
+  }, [selectedOption]);
+
+  const onFilterChange = (newOption) => {
+    console.log(`Filter changed to: ${newOption}`);
+    // Additional logic if needed
+  };
+
+  useEffect(() => {
+    onFilterChange(selectedOption);
+  }, [selectedOption]);
+
+  useEffect(() => {
+    const fetchYears = async () => {
+      try {
+        const response = await fetch('/years')
+        const data = await response.json();
+        setYears(data);
+      } catch (error) {
+        console.error("Error fetching years")
+      }
+    };
+
+    fetchYears();
+  }, []);
+
+  useEffect(() => {
+    const fetchGenres = async () => {
+      try {
+        const response = await fetch('/genres');
+        const data = await response.json();
+        setGenres(data);
+      } catch {
+        console.error("Error fetching genres");
+      }
+    };
+
+    fetchGenres();
+  }, []);
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -158,7 +210,7 @@ function LandingPage() {
         <div className="flex space-x-4 mb-6">
           <div className="w-1/5 hidden lg:block fixed top-0 left-0 p-20 bg-blue-200">
             <Link className="text-2xl font-bold z-10" onClick={"/"}>DramaKu</Link>
-            <SideBarMain selectedOption="dramas" />
+            <SideBarMain selectedOption={selectedOption} onOptionChange={setSelectedOption} />
           </div>
 
           <div className="lg:w-1/6"/>
@@ -186,10 +238,11 @@ function LandingPage() {
                         onChange={handleFilterChange}
                       >
                         <option value="">Year</option>
-                        {/* Add year options */}
-                        <option value="2021">2021</option>
-                        <option value="2020">2020</option>
-                        <option value="2019">2019</option>
+                        {years.map((year) => (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                        ))}
                       </select>
                       <select
                         name="genre"
@@ -198,10 +251,11 @@ function LandingPage() {
                         onChange={handleFilterChange}
                       >
                         <option value="">Genre</option>
-                        {/* Add genre options */}
-                        <option value="Action">Action</option>
-                        <option value="Comedy">Comedy</option>
-                        <option value="Drama">Drama</option>
+                        {genres.map((genre) => (
+                        <option key={genre} value={genre}>
+                          {genre}
+                        </option>
+                        ))}
                       </select>
                       {/* <select
                         name="status"
@@ -252,15 +306,17 @@ function LandingPage() {
                 <form className="flex flex-row space-x-2 mb-4 flex-wrap" onSubmit={handleSubmit}>
                   <select
                     name="year"
-                    className="border border-gray-300 rounded px-4 py-2"
+                    className="border border-gray-300 rounded px-4 py-2 overflow-x-auto"
                     value={filters.year}
                     onChange={handleFilterChange}
                   >
                     <option value="">Year</option>
                     {/* Add year options */}
-                    <option value="2021">2021</option>
-                    <option value="2020">2020</option>
-                    <option value="2019">2019</option>
+                    {years.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                    ))}
                   </select>
                   <select
                     name="genre"
@@ -270,9 +326,11 @@ function LandingPage() {
                   >
                     <option value="">Genre</option>
                     {/* Add genre options */}
-                    <option value="Action">Action</option>
-                    <option value="Comedy">Comedy</option>
-                    <option value="Drama">Drama</option>
+                    {genres.map((genre) => (
+                    <option key={genre} value={genre}>
+                      {genre}
+                    </option>
+                    ))}
                   </select>
                   {/* <select
                     name="status"

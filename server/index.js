@@ -47,7 +47,27 @@ app.get('/count', (req, res) => {
     });
 });
 
-// Dramas pagination
+app.get('/years', (req, res) => {
+    pool.query('SELECT DISTINCT year FROM dramav2 ORDER BY year DESC', (error, results) => {
+        if (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        res.status(200).json(results.rows.map(row => row.year));
+    });
+});
+
+// fetch for genres
+app.get('/genres', (req, res) => {
+    pool.query('SELECT genre FROM genre ORDER BY genre ASC', (error, results) => {
+        if (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        res.status(200).json(results.rows.map(row => row.genre));
+    });
+});
+
 app.get('/dramas', (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;

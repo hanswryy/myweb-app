@@ -8,7 +8,7 @@ const SideBarCMS = ({ selectedOption, onOptionChange }) => {
     };
 
     const handleOptionChange = (option) => {
-        
+        onOptionChange(option);
     }
 
     return (
@@ -51,8 +51,8 @@ const SideBarCMS = ({ selectedOption, onOptionChange }) => {
                 <ul className="space-y-2 p-4">
                     <li>
                         <button
-                            onClick={() => handleOptionChange('all')}
-                            className={selectedOption === 'dramas' ? "text-lg font-bold" : "text-lg"}
+                            onClick={() => handleOptionChange('')}
+                            className={selectedOption === '' ? "text-lg font-bold" : "text-lg"}
                         >
                             All Dramas
                         </button>
