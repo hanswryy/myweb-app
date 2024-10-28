@@ -45,14 +45,9 @@ function Registrasi() {
   };
 
   return (
-    <div>
-      <div className='flex justify-start m-4'>
-        <div className="flex items-center mb-4">
-            <Link to="/" className="mr-4 text-blue-500 hover:underline">
-                &larr; Back
-            </Link>
-        </div>
-        <Link to="/" className="text-2xl font-bold">DramaKu</Link>
+    <div className='bg-blue-100 min-h-screen flex flex-col'>
+      <div className='flex justify-start m-8'>
+          <Link to="/" className="text-2xl font-bold">DramaKu</Link>
       </div>
       <div className="login-container">
             <div className="login-box">
@@ -94,15 +89,12 @@ function Registrasi() {
                 <button type="submit" className="btn login-btn">
                   Register
                 </button>
-                <button type="button" className="btn google-btn">
-                  Sign in with Google
-                </button>
               </form>
 
               {message && <p className="message">{message}</p>}
 
               <div className="mt-6 text-center">
-                <span className="text-sm text-gray-700">Already have an account?</span>
+                <span className="text-sm text-gray-700">Already have an account? </span>
                 <a href="/login" className="text-sm text-blue-600 hover:underline">
                   Login
                 </a>

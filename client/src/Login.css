@@ -1,4 +1,3 @@
-/* Body Styles */
 /* body {
     display: flex;
     justify-content: center;
@@ -9,16 +8,19 @@
 
 /* Login Container */
 .login-container {
+    position: relative; /* Changed from absolute */
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
-    height: 100%;
-}
+    height: 70vh;
+    padding: 4rem; /* Optional padding */
+  }
+  
 
 /* Login Box */
 .login-box {
-    background-color: #f0eeee;
+    background-color: #fff;
     padding: 40px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);

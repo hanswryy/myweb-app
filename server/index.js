@@ -445,6 +445,24 @@ app.get('/users', async (req, res) => {
     }
 });
 
+// create endpoint for create new drama with post method
+app.post('/dramas', async (req, res) => {
+    const { title, year, description, url_photo, country_id, availability, genres, actors } = req.body;
+
+    // check if title is empty
+    if (!title) {
+        return res.status(400).json({ error: 'Title is required' });
+    }
+
+    // sanitize title, year, description, url_photo, availability from escapeHTML
+    const sanitizedTitle = escapeHTML(title);
+    const sanitizedYear = escapeHTML(year);
+    const sanitizedDescription = escapeHTML(description);
+    const sanitizedUrlPhoto = escapeHTML(url_photo);
+    const sanitizedAvailability = escapeHTML(availability);
+
+});
+
 app.listen(PORT, () => {
     console.log(`Server listening on ${PORT}`);
 });

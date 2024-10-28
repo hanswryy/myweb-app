@@ -59,7 +59,7 @@ const Card = ({ drama, user, onToggleWatchlist }) => {
   };
 
   return (
-    <div className="max-w-xs rounded-lg overflow-hidden shadow-sm bg-white p-4 relative" onClick={handleClick}>
+    <div className="max-w-xs rounded-lg overflow-hidden shadow-sm bg-white p-4 relative cursor-pointer " onClick={handleClick}>
       <div className="flex-shrink-0">
         <img
           className="w-full h-40 object-cover rounded-lg"

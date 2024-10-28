@@ -26,8 +26,29 @@ function LandingPage() {
   const [role, setRole] = useState(null); // Role of the user
   const [userID, setUserID] = useState(null); // User ID
   const [isLoggedIn, setIsLoggedIn] = useState(false); // User logged in state
+  const [localStorageInitialized, setLocalStorageInitialized] = useState(false);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const savedFilters = JSON.parse(localStorage.getItem('dramaFilters'));
+    const savedSearchTerm = localStorage.getItem('searchTerm');
+
+    if (savedFilters) setFilters(savedFilters);
+    if (savedSearchTerm) setSearchTerm(savedSearchTerm);
+
+    setLocalStorageInitialized(true);
+
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Save filters and page number to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('dramaFilters', JSON.stringify(filters));
+    localStorage.setItem('searchTerm', searchTerm);
+  }, [filters, searchTerm]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -44,6 +65,10 @@ function LandingPage() {
   }, []);
 
   useEffect(() => {
+    if (!localStorageInitialized) {
+      return;
+    }
+
     const fetchDramasAndCount = async () => {
       const query = new URLSearchParams({
         page: currentPage,
@@ -267,18 +292,24 @@ function LandingPage() {
                       >
                         <option value="">Status</option>
                       </select> */}
-                      <select
-                        name="platform"
-                        className="border border-gray-300 rounded px-4 py-2"
-                        value={filters.platform}
-                        onChange={handleFilterChange}
-                      >
-                        <option value="">Availability</option>
-                        {/* Add availability options */}
-                        <option value="Netflix">Netflix</option>
-                        <option value="Prime">Amazon Prime</option>
-                        <option value="Crunchyroll">Crunchyroll</option>
-                      </select>
+                    <select
+                      name="platform"
+                      className="border border-gray-300 rounded px-4 py-2"
+                      value={filters.platform}
+                      onChange={handleFilterChange}
+                    >
+                      <option value="">Availability</option>
+                      {/* Add availability options */}
+                      <option value="Netflix">Netflix</option>
+                      <option value="Prime">Amazon Prime</option>
+                      <option value="Crunchyroll">Crunchyroll</option>
+                      {/* add for another option (Bstation, Apple TV, Hulu, Viu, Disney) */}
+                      <option value="Bstation">Bstation</option>
+                      <option value="Apple">Apple TV</option>
+                      <option value="Hulu">Hulu</option>
+                      <option value="Viu">Viu</option>
+                      <option value="Disney">Disney</option>
+                    </select>
                       {/* <select
                         name="award"
                         className="border border-gray-300 rounded px-4 py-2"
@@ -287,14 +318,17 @@ function LandingPage() {
                       >
                         <option value="">Award</option>
                       </select> */}
-                      {/* <select
+                      <select
                         name="sortBy"
                         className="border border-gray-300 rounded px-4 py-2"
-                        value={filters.sortBy}
+                        value={filters.sort}
                         onChange={handleFilterChange}
                       >
-                        <option value="Alphabetics">Sorted by: Alphabetics</option>\
-                      </select> */}
+                        <option value="title_asc">Sorted by: Alphabetics Ascending</option>
+                        <option value="title_desc">Sorted by: Alphabetics Descending</option>
+                        <option value="date_asc">Sorted by: Year Ascending</option>
+                        <option value="date_desc">Sorted by: Year Descending</option>
+                      </select>
                       {/* <button
                         className="bg-blue-400 text-white px-4 py-2 rounded"
                         type="submit"
