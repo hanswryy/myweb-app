@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google'; // Importing the required components
 import './Login.css';
 
@@ -74,52 +74,64 @@ function Login() {
   };
 
   return (
-    <div className="login-container">
-      {/* Centering the login-box */}
-      <div className="login-box">
-        <h1>Login</h1>
-        {errorMessage && <p className="error-message">{errorMessage}</p>}
-        <form onSubmit={handleSubmit}>
-          <div className="input-group">
-            <label htmlFor="username">Username</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              required
-              value={username}
-              onChange={(e) => setUsername(e.target.value)} // Update state on input change
-            />
+    // create Title DramaKu and back button
+    <div>
+      <div className='flex justify-start m-4'>
+          <div className="flex items-center mb-4">
+              <Link to="/" className="mr-4 text-blue-500 hover:underline">
+                  &larr; Back
+              </Link>
           </div>
-          <div className="input-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)} // Update state on input change
-            />
-          </div>
-          <button type="submit" className="btn login-btn">Sign in</button>
-        </form>
+          <Link to="/" className="text-2xl font-bold">DramaKu</Link>
+      </div>
+      <div className="login-container">
+        {/* Centering the login-box */}
+        <div className="login-box">
+          <h1>Login</h1>
+          {errorMessage && <p className="error-message">{errorMessage}</p>}
+          <form onSubmit={handleSubmit}>
+            <div className="input-group">
+              <label htmlFor="username">Username</label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                required
+                value={username}
+                onChange={(e) => setUsername(e.target.value)} // Update state on input change
+              />
+            </div>
+            <div className="input-group">
+              <label htmlFor="password">Password</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)} // Update state on input change
+              />
+            </div>
+            <button type="submit" className="btn login-btn">Sign in</button>
+          </form>
 
-        <GoogleLogin className="p-4"
-          onSuccess={handleGoogleSuccess}
-          onFailure={handleGoogleFailure}
-          style={{ marginTop: '10px' }}
-        />
-        
-        <div className="mt-6 text-center">
-          <a href="#" className="text-sm text-blue-600 hover:underline">Forgot your password?</a>
-        </div>
-        <div className="mt-2 text-center">
-          <span className="text-sm text-gray-700">Don't have an account?</span>
-          <a href="/register" className="text-sm text-blue-600 hover:underline"> Register</a>
+          <GoogleLogin className="p-4"
+            onSuccess={handleGoogleSuccess}
+            onFailure={handleGoogleFailure}
+            style={{ marginTop: '10px' }}
+          />
+          
+          <div className="mt-6 text-center">
+            <a href="#" className="text-sm text-blue-600 hover:underline">Forgot your password?</a>
+          </div>
+          <div className="mt-2 text-center">
+            <span className="text-sm text-gray-700">Don't have an account?</span>
+            <a href="/register" className="text-sm text-blue-600 hover:underline"> Register</a>
+          </div>
         </div>
       </div>
     </div>
+    
   );
 }
 

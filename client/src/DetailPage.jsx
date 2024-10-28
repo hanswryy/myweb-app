@@ -183,6 +183,12 @@ function DetailPage() {
                 </div> */}
                 {/* create linked DramaKu title */}
                 <div className='flex justify-between items-center mb-'>
+                    <div className="flex items-center mb-4">
+                        <Link to="/" className="mr-4 text-blue-500 hover:underline">
+                            &larr; Back
+                        </Link>
+                        <h1 className="text-2xl font-bold">DramaKu</h1>
+                    </div>
                     <Link to="/" className="text-2xl font-bold">DramaKu</Link>
                 </div>
                 <div className="mx-auto lg:w-2/3">

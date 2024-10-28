@@ -59,12 +59,23 @@ app.get('/years', (req, res) => {
 
 // fetch for genres
 app.get('/genres', (req, res) => {
-    pool.query('SELECT genre FROM genre ORDER BY genre ASC', (error, results) => {
+    pool.query('SELECT genre_name FROM genrev2 ORDER BY genre_name ASC', (error, results) => {
         if (error) {
             console.error(error);
             return res.status(500).json({ error: 'Internal Server Error' });
         }
-        res.status(200).json(results.rows.map(row => row.genre));
+        res.status(200).json(results.rows.map(row => row.genre_name));
+    });
+});
+
+// fetch for countries
+app.get('/countries', (req, res) => {
+    pool.query('SELECT * FROM country ORDER BY name ASC', (error, results) => {
+        if (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        res.status(200).json(results.rows);
     });
 });
 
@@ -77,6 +88,25 @@ app.get('/dramas', (req, res) => {
     const genre = req.query.genre || '';
     const title = req.query.title || '';
     const country_id = req.query.country_id || null;
+    const sort = req.query.sort || 'title_asc'; // Default sorting
+
+    let orderBy;
+    switch (sort) {
+        case 'title_asc':
+            orderBy = 'd.title ASC';
+            break;
+        case 'title_desc':
+            orderBy = 'd.title DESC';
+            break;
+        case 'date_asc':
+            orderBy = 'd.year ASC';
+            break;
+        case 'date_desc':
+            orderBy = 'd.year DESC';
+            break;
+        default:
+            orderBy = 'd.title ASC';
+    }
 
     const query = `
         SELECT d.*, ARRAY_AGG(g.genre) AS genres
@@ -89,7 +119,7 @@ app.get('/dramas', (req, res) => {
         AND ($7::int IS NULL OR d.country_id = $7::int)
         GROUP BY d.id
         HAVING ($5 = '' OR $5 = ANY(ARRAY_AGG(g.genre)))
-        ORDER BY d.title
+        ORDER BY ${orderBy}
         LIMIT $1 OFFSET $2;
     `;
 

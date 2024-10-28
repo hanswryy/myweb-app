@@ -21,6 +21,7 @@ function LandingPage() {
     platform: "",
     title: "",
     country_id: "",
+    sort: "title_asc"
   });
   const [role, setRole] = useState(null); // Role of the user
   const [userID, setUserID] = useState(null); // User ID
@@ -145,6 +146,7 @@ function LandingPage() {
         const response = await fetch('/genres');
         const data = await response.json();
         setGenres(data);
+        console.log(data);
       } catch {
         console.error("Error fetching genres");
       }
@@ -209,7 +211,7 @@ function LandingPage() {
 
         <div className="flex space-x-4 mb-6">
           <div className="w-1/5 hidden lg:block fixed top-0 left-0 p-20 bg-blue-200">
-            <Link className="text-2xl font-bold z-10" onClick={"/"}>DramaKu</Link>
+            <Link to="/"  className="text-2xl font-bold z-10" >DramaKu</Link>
             <SideBarMain selectedOption={selectedOption} onOptionChange={setSelectedOption} />
           </div>
 
@@ -351,6 +353,12 @@ function LandingPage() {
                     <option value="Netflix">Netflix</option>
                     <option value="Prime">Amazon Prime</option>
                     <option value="Crunchyroll">Crunchyroll</option>
+                    {/* add for another option (Bstation, Apple TV, Hulu, Viu, Disney) */}
+                    <option value="Bstation">Bstation</option>
+                    <option value="Apple">Apple TV</option>
+                    <option value="Hulu">Hulu</option>
+                    <option value="Viu">Viu</option>
+                    <option value="Disney">Disney</option>
                   </select>
                   {/* <select
                     name="award"
@@ -360,14 +368,17 @@ function LandingPage() {
                   >
                     <option value="">Award</option>
                   </select> */}
-                  {/* <select
+                  <select
                     name="sortBy"
                     className="border border-gray-300 rounded px-4 py-2"
-                    value={filters.sortBy}
+                    value={filters.sort}
                     onChange={handleFilterChange}
                   >
-                    <option value="Alphabetics">Sorted by: Alphabetics</option>\
-                  </select> */}
+                    <option value="title_asc">Sorted by: Alphabetics Ascending</option>
+                    <option value="title_desc">Sorted by: Alphabetics Descending</option>
+                    <option value="date_asc">Sorted by: Year Ascending</option>
+                    <option value="date_desc">Sorted by: Year Descending</option>
+                  </select>
                   {/* <button
                     className="bg-blue-400 text-white px-4 py-2 rounded"
                     type="submit"
