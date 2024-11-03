@@ -319,7 +319,7 @@ function LandingPage() {
                         <option value="">Award</option>
                       </select> */}
                       <select
-                        name="sortBy"
+                        name="sort"
                         className="border border-gray-300 rounded px-4 py-2"
                         value={filters.sort}
                         onChange={handleFilterChange}
@@ -403,7 +403,7 @@ function LandingPage() {
                     <option value="">Award</option>
                   </select> */}
                   <select
-                    name="sortBy"
+                    name="sort"
                     className="border border-gray-300 rounded px-4 py-2"
                     value={filters.sort}
                     onChange={handleFilterChange}

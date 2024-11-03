@@ -107,7 +107,7 @@ app.get('/dramas', (req, res) => {
     const genre = req.query.genre || '';
     const title = req.query.title || '';
     const country_id = req.query.country_id || null;
-    const sort = req.query.sort || 'title_asc'; // Default sorting
+    const sort = req.query.sort || ''; // Default sorting
 
     let orderBy;
     switch (sort) {
