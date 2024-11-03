@@ -79,6 +79,25 @@ app.get('/countries', (req, res) => {
     });
 });
 
+// fetch actors
+app.get('/actors', (req, res) => {
+    const searchTerm = req.query.searchTerm || '';
+    const query = `
+        SELECT * FROM actor
+        WHERE name ILIKE $1
+        ORDER BY name ASC
+    `;
+    const values = [`%${searchTerm}%`];
+
+    pool.query(query, values, (error, results) => {
+        if (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        res.status(200).json(results.rows);
+    });
+});
+
 app.get('/dramas', (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
@@ -445,22 +464,70 @@ app.get('/users', async (req, res) => {
     }
 });
 
-// create endpoint for create new drama with post method
-app.post('/dramas', async (req, res) => {
-    const { title, year, description, url_photo, country_id, availability, genres, actors } = req.body;
+// Create endpoint for creating a new drama with POST method
+app.post('/new_drama', async (req, res) => {
+    const { title, alt_title, year, synopsis, url_photo, country_id, availability, genres, actors, trailer_link } = req.body;
+    console.log(req.body);
 
-    // check if title is empty
+    // Check if title is empty
     if (!title) {
         return res.status(400).json({ error: 'Title is required' });
     }
 
-    // sanitize title, year, description, url_photo, availability from escapeHTML
-    const sanitizedTitle = escapeHTML(title);
-    const sanitizedYear = escapeHTML(year);
-    const sanitizedDescription = escapeHTML(description);
-    const sanitizedUrlPhoto = escapeHTML(url_photo);
-    const sanitizedAvailability = escapeHTML(availability);
+    const client = await pool.connect();
 
+    try {
+        await client.query('BEGIN');
+
+        // actors is an array of actor id, so we need to convert it to an array of actor name
+        const actorQuery = `
+            SELECT name FROM actor WHERE id = ANY($1::int[]);
+        `;
+        const actorResult = await client.query(actorQuery, [actors]);
+
+        // Insert new drama into dramav2 table
+        const insertDramaQuery = `
+            INSERT INTO dramav2 (title, alternative_title, year, synopsis, url_photo, country_id, availability, actors, link_trailer)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            RETURNING id;
+        `;
+        const dramaResult = await client.query(insertDramaQuery, [title, alt_title, year, synopsis, url_photo, country_id, availability, actorResult.rows.map(row => row.name), trailer_link]);
+        const dramaId = dramaResult.rows[0].id;
+
+        // Get genre IDs from genrev2 table
+        const genreQuery = `
+            SELECT id FROM genrev2 WHERE genre_name = ANY($1::text[]);
+        `;
+        const genreResult = await client.query(genreQuery, [genres]);
+        const genreIds = genreResult.rows.map(row => row.id);
+
+        // Insert genres into drama_genre table
+        const insertGenreQuery = `
+            INSERT INTO drama_genre (drama_id, genre_id)
+            VALUES ($1, $2);
+        `;
+        for (const genreId of genreIds) {
+            await client.query(insertGenreQuery, [dramaId, genreId]);
+        }
+
+        // Insert actors into drama_actor table
+        const insertActorQuery = `
+            INSERT INTO drama_actor (drama_id, actor_id)
+            VALUES ($1, $2);
+        `;
+        for (const actorId of actors) {
+            await client.query(insertActorQuery, [dramaId, actorId]);
+        }
+
+        await client.query('COMMIT');
+        res.status(201).json({ message: 'New drama created successfully', dramaId });
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Error creating new drama:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    } finally {
+        client.release();
+    }
 });
 
 app.listen(PORT, () => {
