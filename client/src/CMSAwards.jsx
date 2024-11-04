@@ -65,8 +65,8 @@ function Awards() {
                 </div>
             </form>
 
-            <table className="w-full table-auto text-md shadow-lg">
-              <thead>
+            <table className="w-full table-auto text-md shadow-md rounded-lg overflow-hidden">
+              <thead className="bg-gray-200 text-gray-600 table-header-group">
                 <tr className="text-left">
                   <th className="p-2">#</th>
                   <th className="p-2">Countries</th>

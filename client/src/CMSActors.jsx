@@ -1,9 +1,171 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import './index.css';
 import SideBarCMS from './components/SideBarCMS';
 
 function Actors() {
+  const [actor, setActor] = useState([]);
+  const [countries, setCountries] = useState([]); // State untuk menyimpan daftar negara
+  const [form, setForm] = useState({
+    name: '',
+    country_id: '',
+    birth_date: '',
+    url_photo: null
+  });
+  const [previewImage, setPreviewImage] = useState(''); // Untuk menyimpan file foto yang diunggah
+  const [editId, setEditId] = useState('');
+  const [filterCountry, setFilterCountry] = useState(''); // State for selected country filter
+const [showCount, setShowCount] = useState(10); // State for number of shows per page
+const [searchTerm, setSearchTerm] = useState(''); // State for the search term
+
+// Filter and search actors based on filterCountry and searchTerm
+const filteredActors = actor
+  .filter((actor) => 
+    (filterCountry === '' || actor.country_id === parseInt(filterCountry)) &&
+    (searchTerm === '' || actor.name.toLowerCase().includes(searchTerm.toLowerCase()))
+  )
+  .slice(0, showCount);
+
+  useEffect(() => {
+    fetchActors();
+    fetchCountries(); // Ambil daftar negara saat komponen dimuat
+  }, []);
+
+  const fetchActors = async () => {
+    try {
+        const response = await fetch('/actor');
+        if (!response.ok) throw new Error("Failed to fetch actors");
+        const data = await response.json();
+        setActor(data);
+    } catch (error) {
+        console.error("Error fetching actor:", error);
+    }
+  };
+
+  const fetchCountries = async () => {
+    try {
+        const response = await fetch('/country'); // Ambil data dari endpoint country
+        const data = await response.json();
+        setCountries(data); // Simpan data negara dalam state
+    } catch (error) {
+        console.error("Error fetching countries:", error);
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setForm(prevForm => ({
+        ...prevForm,
+        url_photo: file,
+      }));
+      setPreviewImage(URL.createObjectURL(file));
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setForm(prevForm => ({
+      ...prevForm,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log('Current form:', form);
+
+    if (!form.url_photo) {
+      console.error('Photo is required');
+      alert('Please upload a photo before submitting.');
+      return;
+    }
+
+    const formDataForActor = new FormData();
+    formDataForActor.append('country_id', form.country_id);
+    formDataForActor.append('name', form.name);
+
+    const formattedBirthDate = form.birth_date.split('T')[0];
+    formDataForActor.append('birth_date', formattedBirthDate);
+
+    formDataForActor.append('url_photo', form.url_photo);
+
+    try {
+      const response = await fetch("/actor", {
+        method: "POST",
+        body: formDataForActor,
+      });
+
+      if (!response.ok) {
+        const errorResponse = await response.text();
+        throw new Error(`Error: ${errorResponse || response.statusText}`);
+      }
+
+      setForm({ name: '', country_id: '', birth_date: '', url_photo: null });
+      setPreviewImage('');
+      fetchActors();
+    } catch (error) {
+      console.error("Error creating actor:", error);
+    }
+  };
+
+  const handleEdit = (actor) => {
+    setEditId(actor.id);
+    setForm({
+      name: actor.name || '',
+      country_id: actor.country_id || '',
+      birth_date: actor.birth_date.split('T')[0] || '', // Format tanggal
+      url_photo: null
+    });
+    setPreviewImage(actor.url_photo);
+  };
+
+  const handleSave = async (id) => {
+      const formDataForUpdate = new FormData();
+      formDataForUpdate.append('country_id', form.country_id);
+      formDataForUpdate.append('name', form.name);
+  
+      const formattedBirthDate = form.birth_date.split('T')[0];
+      formDataForUpdate.append('birth_date', formattedBirthDate);
+  
+      // Hanya tambahkan foto jika ada perubahan
+      if (form.url_photo) {
+          formDataForUpdate.append('url_photo', form.url_photo);
+      }
+  
+      try {
+          const response = await fetch(`/actor/${id}`, {
+              method: 'PUT',
+              body: formDataForUpdate, // Mengirim data sebagai FormData
+          });
+          if (!response.ok) throw new Error("Failed to update actor");
+  
+          // Refresh daftar aktor dan reset form
+          setEditId(null);
+          setForm({ name: '', country_id: '', birth_date: '', url_photo: null });
+          setPreviewImage('');
+          fetchActors(); // Mengambil ulang data untuk diperbarui di tabel
+      } catch (error) {
+          console.error('Error updating actor:', error);
+      }
+  };
+
+  const handleCancel = () => {
+    setEditId(null);
+    setForm({ name: '', country_id: '', birth_date: '', url_photo: null });
+    setPreviewImage('');
+  };
+
+  const deleteActor = async (id) => {
+      try {
+        const response = await fetch(`/actor/${id}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error("Failed to delete actor");
+        setActor((prevActors) => prevActors.filter((actor) => actor.id !== id));
+      } catch (error) {
+          console.error("Error deleting actor:", error);
+      }
+  };
+
   return (
     <div className="bg-gray-100">
       <div className="container mx-auto px-4 py-6">
@@ -17,115 +179,183 @@ function Actors() {
           </div>
 
           <div className="w-5/6">
-            <form className="mb-4">
+            <form className="mb-4" onSubmit={handleSubmit}>
               <div className="flex space-x-4 mb-4">
                 <div className="flex-1">
-                  <label htmlFor="country" className="text-md mr-10">Country</label>
-                    <input
-                      type="text"
-                      id="country"
-                      name="country"
-                      className="border border-gray-300 rounded px-4 py-2 w-full"
-                      style={{ maxWidth: "300px", padding: "4px" }}
-                    />
+                  <label htmlFor="country_id" className="text-md mr-10">Country</label>
+                  <select
+                    id="country_id"
+                    name="country_id"
+                    value={form.country_id}
+                    onChange={handleInputChange}
+                    className="border border-gray-300 rounded px-4 py-2 w-full"
+                    style={{ maxWidth: "300px", padding: "4px" }}
+                  >
+                    <option value="">Select Country</option>
+                    {countries.map((country) => (
+                      <option key={country.id} value={country.id}>
+                        {country.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="flex-1">
-                  <label htmlFor="uppicture" className="text-md mr-2">Upload Picture</label>
-                    <input
-                      className="form-control mr-2"
-                      id="uppicture"
-                      type="file"
-                      aria-label="Upload Picture"
-                      accept="image/*"
-                    />
+                  <label htmlFor="url_photo" className="text-md mr-2">Upload Picture</label>
+                  <input
+                    className="form-control mr-2"
+                    id="url_photo"
+                    type="file"
+                    onChange={handleFileChange}
+                    aria-label="Upload Picture"
+                    accept="image/*"
+                  />
+                  {previewImage && (
+                    <img src={previewImage} alt="Preview" className="w-20 h-20 rounded" />
+                  )}
                 </div>
               </div>
               <div className="mb-4">
-                <label htmlFor="actorname" className="text-md mr-2">Actor Name</label>
+                <label htmlFor="name" className="text-md mr-2">Actor Name</label>
                 <input
                     type="text"
-                    id="actorname"
-                    name="actorname"
+                    id="name"
+                    name="name"
+                    value={form.name}
+                    onChange={handleInputChange}
                     className="border border-gray-300 rounded px-4 py-2 w-full"
                     style={{ maxWidth: "300px", padding: "4px" }}
-                    />
+                />
               </div>
               <div className="mb-4">
-                <label htmlFor="birthdate" className="text-md mr-6">Birth Date</label>
-                  <input
-                    type="text"
-                    id="birthdate"
-                    name="birthdate"
+                <label htmlFor="birth_date" className="text-md mr-6">Birth Date</label>
+                <input
+                    type="date"
+                    id="birth_date"
+                    name="birth_date"
+                    value={form.birth_date}
+                    onChange={handleInputChange}
                     className="border border-gray-300 rounded px-4 py-2 w-full"
                     style={{ maxWidth: "300px", padding: "4px" }}
-                  />
+                />
               </div>
               <div className="mb-4 text-md">
                 <button
                     type="submit"
+                    // onClick={editId ? () => handleSave(editId) : handleSubmit}
                     style={{
                       backgroundColor: "#ff8636",
                       color: "white",
                       borderRadius: "10px",
                       padding: "4px 12px",
                     }}
-                  >
-                    Submit
+                >
+                  {/* {editId ? 'Update' : 'Submit'} */}
+                  Submit
                 </button>
               </div>
             </form>
 
-            <table className="w-full table-auto text-md shadow-lg">
-              <thead>
+            <div className="flex flex-col lg:flex-row space-y-4 lg:space-x-2 mb-4 flex-wrap justify-between">
+                            <div className="flex flex-row">
+                                <div className="flex items-center space-x-2">
+                                    <label htmlFor="filterCountry" className="block text-base mb-2">Filtered by Country:</label>
+                                    <select
+                                      id="filterCountry"
+                                      value={filterCountry}
+                                      onChange={(e) => setFilterCountry(e.target.value)}
+                                      className="border border-gray-300 rounded-md px-4 py-2 text-center"
+                                      // style={{ maxWidth: "200px", padding: "4px" }}
+                                    >
+                                    <option value="">All Countries</option>
+                                      {countries.map((country) => (
+                                        <option key={country.id} value={country.id}>
+                                          {country.name}
+                                        </option>
+                                      ))}
+                                    </select>
+                                </div>
+                                <div className="flex items-center space-x-2 ml-4">
+                                    <label htmlFor="showCount" className="block text-base mb-2">Shows</label>
+                                    <select
+                                      id="showCount"
+                                      value={showCount}
+                                      onChange={(e) => setShowCount(parseInt(e.target.value) || 10)} 
+                                      className="border border-gray-300 rounded-md px-4 py-2 text-center"
+                                      // style={{ maxWidth: "80px", padding: "4px" }}
+                                    >
+                                    <option value={10}>10</option>
+                                    <option value={20}>20</option>
+                                    <option value={30}>30</option>
+                                    </select>
+                                </div>
+                            </div>  
+                            <input
+                                type="text"
+                                id="searchTerm"
+                                placeholder="Search Actors"
+                                className="border border-gray-300 rounded-full px-4 py-2 w-64"
+                                // style={{ maxWidth: "200px", padding: "4px" }}
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+
+            <table className="w-full table-auto text-md shadow-md rounded-lg overflow-hidden">
+              <thead className="bg-gray-200 text-gray-600 table-header-group">
                 <tr className="text-left">
                   <th className="p-2">#</th>
-                  <th className="p-2">Countries</th>
+                  <th className="p-2">Country</th>
                   <th className="p-2">Actor Name</th>
                   <th className="p-2">Birth Date</th>
-                  <th className="p-2">Photos</th>
+                  <th className="p-2">Photo</th>
                   <th className="p-2">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                <tr className="bg-red-50">
-                    <td className="p-2">1</td>
-                    <td className="p-2">Japan</td>
-                    <td className="p-2">Takuya Kimura</td>
-                    <td className="p-2">19 Desember 1975</td>
-                    <td>
-                        <img src={process.env.PUBLIC_URL + "/Takuya Kimura.jpeg"} className="custom-img" alt="Takuya Kimura" />
-                    </td>
-                    <td className="p-2 actions">
-                        <button className="text-red-500">Edit</button>|
-                        <button className="text-red-500">Delete</button>
-                    </td>
-                </tr>
-                <tr className="bg-gray-50">
-                    <td className="p-2">2</td>
-                    <td className="p-2">Korea</td>
-                    <td className="p-2">Cha Eunwoo</td>
-                    <td className="p-2">30 Maret 1997</td>
-                    <td>
-                        <img src={process.env.PUBLIC_URL + "/Cha Eunwoo.jpeg"} className="custom-img" alt="Cha Eunwoo" />
-                    </td>
-                    <td className="p-2 actions">
-                        <button className="text-red-500">Edit</button>|
-                        <button className="text-red-500">Delete</button>
-                    </td>
-                </tr>
-                <tr className="bg-red-50">
-                    <td className="p-2">3</td>
-                    <td className="p-2">China</td>
-                    <td className="p-2">Cheng Yi</td>
-                    <td className="p-2">17 Mei 1990</td>
-                    <td>
-                        <img src={process.env.PUBLIC_URL + "/Cheng Yi.jpeg"} className="custom-img" alt="Cheng Yi" />
-                    </td>
-                    <td className="p-2 actions">
-                        <button className="text-red-500">Edit</button>|
-                        <button className="text-red-500">Delete</button>
-                    </td>
-                </tr>
+                {filteredActors.map((actor, index) => (
+                    <tr key={actor.id} className={index % 2 === 0 ? "bg-red-50" : "bg-gray-50"}>
+                      <td className="p-2">{index + 1}</td>
+                      <td className="p-2">{countries.find(country => country.id === actor.country_id)?.name || "Unknown"}</td>
+                      <td className="p-2">{actor.name}</td>
+                      <td className="p-2">{actor.birth_date.split('T')[0]}</td>
+                      <td>
+                        <img src={actor.url_photo} className="custom-img" alt={actor.name} />
+                      </td>
+                      <td className="p-2 actions">
+                        {editId === actor.id ? (
+                          <>
+                            <button 
+                            onClick={() => handleSave(actor.id)}
+                            className="mr-2 bg-green-500 text-white px-3 py-1 rounded"
+                            >
+                            Save
+                            </button>
+                            <button 
+                            onClick={handleCancel}
+                            className="bg-gray-500 text-white px-3 py-1 rounded"
+                            >
+                            Cancel
+                            </button>
+                          </>
+                          ) : (
+                            <>
+                          <button 
+                            onClick={() => handleEdit(actor)}
+                            className="mr-2 bg-blue-500 text-white px-3 py-1 rounded"
+                          >
+                            Edit
+                          </button>
+                          <button
+                          onClick={() => deleteActor(actor.id)}
+                          className="bg-red-500 text-white px-3 py-1 rounded"
+                          >
+                            Delete
+                          </button>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>

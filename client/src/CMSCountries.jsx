@@ -1,9 +1,142 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 import './index.css';
 import SideBarCMS from './components/SideBarCMS';
 
 function Countries() {
+  const [countries, setCountries] = useState([]); // State untuk menyimpan data negara
+  const [loading, setLoading] = useState(true); // State untuk loading
+  const [error, setError] = useState(null); // State untuk menyimpan error
+  const [newCountry, setNewCountry] = useState(''); // State untuk country baru
+  const [editingCountry, setEditingCountry] = useState(null); // State untuk country yang sedang diedit
+  const [editName, setEditName] = useState(''); // State untuk nama country yang sedang diedit
+  const [filteredCountries, setFilteredCountries] = useState([]); // State untuk menyimpan negara yang difilter
+  const [searchTerm, setSearchTerm] = useState(''); // State untuk pencarian
+  const [showCount, setShowCount] = useState(10); // State untuk jumlah item yang ditampilkan
+
+  const fetchCountries = async () => {
+    try {
+      const response = await fetch('/country'); // Mengambil data dari endpoint
+      if (!response.ok) {
+        throw new Error('Failed to fetch countries');
+      }
+      const data = await response.json();
+      setCountries(data); // Simpan data ke state
+      setFilteredCountries(data);
+    } catch (error) {
+      console.error('Error fetching countries:', error);
+      setError(error.message); // Set error message
+    } finally {
+      setLoading(false); // Set loading menjadi false setelah fetch
+    }
+  };
+
+  useEffect(() => {
+    fetchCountries(); // Panggil fungsi fetchCountries saat komponen di-mount
+  }, []);
+
+  // Fungsi untuk menambahkan negara baru
+  const handleAddCountry = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('/country', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newCountry }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to add country');
+      }
+      const addedCountry = await response.json();
+      setCountries([addedCountry, ...countries]); // Update state dengan negara baru
+      setFilteredCountries([addedCountry, ...filteredCountries]);
+      setNewCountry(''); // Reset input field
+    } catch (error) {
+      console.error('Error adding country:', error);
+      setError(error.message);
+    }
+  };
+
+  // Fungsi untuk memulai edit negara
+  const startEditing = (country) => {
+    setEditingCountry(country.id);
+    setEditName(country.name);
+  };
+
+  // Fungsi untuk menyimpan perubahan negara
+  const handleUpdateCountry = async (id) => {
+    try {
+      const response = await fetch(`/country/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: editName }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update country');
+      }
+      const updatedCountry = await response.json();
+      const updatedCountries = countries.map((country) =>
+        country.id === id ? updatedCountry : country
+      );
+      setCountries(updatedCountries);
+      setFilteredCountries(updatedCountries);
+      setEditingCountry(null);
+    } catch (error) {
+      console.error('Error updating country:', error);
+      setError(error.message);
+    }
+  };
+
+  // Fungsi untuk membatalkan proses edit
+  const handleCancelEdit = () => {
+    setEditingCountry(null);
+    setEditName(''); // Reset nama negara yang sedang diedit
+  };
+
+  // Fungsi untuk menghapus negara
+  const handleDeleteCountry = async (id) => {
+    try {
+      const response = await fetch(`/country/${id}`, { method: 'DELETE' });
+      if (!response.ok) {
+        throw new Error('Failed to delete country');
+      }
+      const updatedCountries = countries.filter((country) => country.id !== id);
+      setCountries(updatedCountries);
+      setFilteredCountries(updatedCountries);
+    } catch (error) {
+      console.error('Error deleting country:', error);
+      setError(error.message);
+    }
+  };
+
+  // Fungsi untuk mencari negara berdasarkan input
+  const handleSearch = (e) => {
+    const term = e.target.value;
+    setSearchTerm(term);
+    if (term) {
+      setFilteredCountries(
+        countries.filter((country) =>
+          country.name.toLowerCase().includes(term.toLowerCase())
+        )
+      );
+    } else {
+      setFilteredCountries(countries);
+    }
+  };
+
+  // Fungsi untuk mengubah jumlah item yang ditampilkan
+  const handleShowCountChange = (e) => {
+    setShowCount(Number(e.target.value));
+  };
+
+  if (loading) {
+    return <div className="text-center">Loading...</div>; // Tampilkan loading saat data sedang diambil
+  }
+
+  if (error) {
+    return <div className="text-center">An error occurred: {error}</div>; // Tampilkan pesan error
+  }
+
   return (
     <div className="bg-gray-50">
       <div className="container mx-auto px-4 py-6">
@@ -13,19 +146,22 @@ function Countries() {
 
         <div className="flex space-x-4">
           <div className="w-1/6">
-            <SideBarCMS selectedOption="countries"/>
+            <SideBarCMS selectedOption="countries" />
           </div>
 
           <div className="w-5/6">
-            <form className="mb-4 text-md">
+            <form className="mb-4 text-md" onSubmit={handleAddCountry}>
               <div className="flex items-center">
                 <label htmlFor="country" className="text-md mr-4">Country</label>
                 <input
                   type="text"
                   id="country"
                   name="country"
+                  value={newCountry}
+                  onChange={(e) => setNewCountry(e.target.value)}
                   className="border border-gray-300 rounded px-4 py-2 mr-4 w-full"
                   style={{ maxWidth: "300px", padding: "4px" }}
+                  required
                 />
                 <button
                   type="submit"
@@ -33,7 +169,7 @@ function Countries() {
                     backgroundColor: "#ff8636",
                     color: "white",
                     borderRadius: "10px",
-                    padding: "4px 12px"
+                    padding: "4px 12px",
                   }}
                 >
                   Submit
@@ -41,8 +177,28 @@ function Countries() {
               </div>
             </form>
 
-            <table className="w-full table-auto text-md shadow-lg">
-              <thead>
+            <div className="flex flex-col lg:flex-row space-y-4 lg:space-x-2 mb-4 flex-wrap justify-between">
+                            <div className="flex flex-row">
+                                <div className="flex items-center space-x-2">
+                                    <label className="block text-base mb-2">Shows</label>
+                                    <select className="border border-gray-300 rounded-md px-4 py-2 text-center" value={showCount} onChange={handleShowCountChange}>
+                                        <option>10</option>
+                                        <option>20</option>
+                                        <option>30</option>
+                                    </select>
+                                </div>
+                            </div>  
+                            <input
+                                type="text"
+                                placeholder="Search Countries"
+                                className="border border-gray-300 rounded-full px-4 py-2 w-64"
+                                value={searchTerm}
+                                onChange={handleSearch}
+                            />
+                        </div>
+
+            <table className="w-full table-auto text-md shadow-md rounded-lg overflow-hidden">
+              <thead className="bg-gray-200 text-gray-600 table-header-group">
                 <tr className="text-left">
                   <th className="p-2">#</th>
                   <th className="p-2">Countries</th>
@@ -50,43 +206,54 @@ function Countries() {
                 </tr>
               </thead>
               <tbody>
-                <tr className="bg-red-50">
-                  <td className="p-2">1</td>
-                  <td className="p-2 flex items-center">
-                    <input
-                      type="text"
-                      value="Japan"
-                      className="border border-gray-300 rounded px-2 py-1"
-                      style={{ maxWidth: "200px" }}
-                    />
-                    <input
-                      type="radio"
-                      name="default"
-                      className="ml-4"
-                    />
-                    <span className="ml-2 text-gray-500">Default</span>
-                  </td>
-                  <td className="p-2 actions">
-                    <button className="text-red-500">Rename</button>|
-                    <button className="text-red-500">Delete</button>
-                  </td>
-                </tr>
-                <tr className="bg-gray-50">
-                  <td className="p-2">2</td>
-                  <td className="p-2">Korea</td>
-                  <td className="p-2 actions">
-                    <button className="text-red-500">Rename</button>|
-                    <button className="text-red-500">Delete</button>
-                  </td>
-                </tr>
-                <tr className="bg-red-50">
-                  <td className="p-2">3</td>
-                  <td className="p-2">China</td>
-                  <td className="p-2 actions">
-                    <button className="text-red-500">Rename</button>|
-                    <button className="text-red-500">Delete</button>
-                  </td>
-                </tr>
+                {filteredCountries.slice(0, showCount).map((country, index) => (
+                  <tr key={country.id} className={index % 2 === 0 ? 'bg-red-50' : 'bg-gray-50'}>
+                    <td className="p-2">{index + 1}</td>
+                    <td className="p-2">
+                      {editingCountry === country.id ? (
+                        <input
+                          type="text"
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          className="border border-gray-300 rounded px-2 py-1 w-full"
+                        />
+                      ) : (
+                        country.name
+                      )}
+                    </td>
+                    <td className="p-2 actions">
+                      {editingCountry === country.id ? (
+                        <>
+                          <button
+                          className="text-blue-500 mr-2"
+                          onClick={() => handleUpdateCountry(country.id)}
+                          >
+                            Save
+                          </button>
+                          <button
+                          className="text-gray-500 mr-2"
+                          onClick={handleCancelEdit}
+                          >
+                          | Cancel |
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          className="text-red-500 mr-2"
+                          onClick={() => startEditing(country)}
+                        >
+                          Rename | 
+                        </button>
+                      )}
+                      <button
+                        className="text-red-500"
+                        onClick={() => handleDeleteCountry(country.id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
