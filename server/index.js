@@ -748,6 +748,9 @@ app.delete('/users/:id', async (req, res) => {
     } catch (error) {
         console.error(error.message);
         res.status(500).json({ message: "Error deleting user" });
+    }
+});
+
 // Create endpoint for creating a new drama with POST method
 app.post('/new_drama', async (req, res) => {
     const { title, alt_title, year, synopsis, url_photo, country_id, availability, genres, actors, trailer_link } = req.body;
