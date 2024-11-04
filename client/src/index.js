@@ -18,6 +18,7 @@ import CMSActors from './CMSActors';
 import CMSUsers from './CMSUsers';
 import Login from './Login';
 import Register from './Registrasi';
+import WatchlistPage from './WatchList';
 
 const ProtectedRoute = ({ children, requiredRole }) => {
   const [isAuthorized, setIsAuthorized] = useState(null); // Use 'null' as initial state to indicate loading
@@ -61,29 +62,30 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-    <Router>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/detailPage" element={<DetailPage />} />
-        <Route 
-          path="/cms" 
-          element={
-            <ProtectedRoute requiredRole={0}> {/* Only admins */}
-              <CMSDrama />
-            </ProtectedRoute>
-          } 
-        />
-        <Route path="/cms/input" element={<CMSInputDrama />} />
-        <Route path="/cms/countries" element={<CMSCountries />} />
-        <Route path="/cms/comments" element={<CMSComments />} />
-        <Route path="/cms/awards" element={<CMSAwards />} />
-        <Route path="/cms/genres" element={<CMSGenres />} />
-        <Route path="/cms/actors" element={<CMSActors />} />
-        <Route path="/cms/users" element={<CMSUsers />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-      </Routes>
-    </Router>
+  <Router>
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/detailDrama/:id" element={<DetailPage />} />
+      <Route 
+        path="/cms" 
+        element={
+          <ProtectedRoute requiredRole={0}> {/* Only admins */}
+            <CMSDrama />
+          </ProtectedRoute>
+        } 
+      />
+      <Route path="/cms/input" element={<CMSInputDrama />} />
+      <Route path="/cms/countries" element={<CMSCountries />} />
+      <Route path="/cms/comments" element={<CMSComments />} />
+      <Route path="/cms/awards" element={<CMSAwards />} />
+      <Route path="/cms/genres" element={<CMSGenres />} />
+      <Route path="/cms/actors" element={<CMSActors />} />
+      <Route path="/cms/users" element={<CMSUsers />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/watchlist" element={<WatchlistPage/>} />
+    </Routes>
+  </Router>
 );
 
 reportWebVitals();

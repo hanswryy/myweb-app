@@ -1,11 +1,9 @@
 require('dotenv').config();
-
 const pool = require('./db');
 const express = require('express');
 const cors = require('cors');
 const PORT = process.env.PORT || 3001;
 const app = express();
-// Import bcrypt and jsonwebtoken
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cloudinary = require('cloudinary').v2;
@@ -36,101 +34,165 @@ app.post('/uploadimg', uploadimg.single('file'), async (req, res) => {
       res.status(500).json({ error: 'Upload failed' });
     }
   });
+const { OAuth2Client } = require('google-auth-library');
 
-// Define the CORS options
+var validator = require('validator');
+
+function escapeHTML(str) {
+    return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+}
+
+// Initialize Google OAuth2 client with your client ID
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// CORS options
 const corsOptions = {
     credentials: true,
-    origin: ['http://localhost:3001', 'http://localhost:3000'] // Whitelist the domains you want to allow
+    origin: ['http://localhost:3001', 'http://localhost:3000']
 };
+app.use(cors(corsOptions)); // Use CORS middleware
+app.use(express.json()); // Middleware to parse JSON bodies
+app.use(express.urlencoded({ extended: true })); // Middleware for urlencoded bodies
 
-app.use(cors(corsOptions)); // Use the cors middleware with your options
-
-// Middleware to parse JSON bodies
-app.use(express.json());
-
-// Middleware to parse urlencoded bodies
-app.use(express.urlencoded({ extended: true }));
-
+// Example endpoint
 app.get('/api', (req, res) => {
     res.json({ message: 'Hello from server!' });
 });
 
-// endpoint to get count of all dramas
+// Endpoint to get count of all dramas
 app.get('/count', (req, res) => {
     pool.query('SELECT COUNT(*) FROM dramav2', (error, results) => {
         if (error) {
-            console.error(error); // Log the error to the console
+            console.error(error);
             return res.status(500).json({ error: 'Internal Server Error' });
         }
         res.status(200).json(results.rows[0]);
     });
 });
 
+app.get('/years', (req, res) => {
+    pool.query('SELECT DISTINCT year FROM dramav2 ORDER BY year DESC', (error, results) => {
+        if (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        res.status(200).json(results.rows.map(row => row.year));
+    });
+});
+
+// fetch for genres
+app.get('/genres', (req, res) => {
+    pool.query('SELECT genre_name FROM genrev2 ORDER BY genre_name ASC', (error, results) => {
+        if (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        res.status(200).json(results.rows.map(row => row.genre_name));
+    });
+});
+
+// fetch for countries
+app.get('/countries', (req, res) => {
+    pool.query('SELECT * FROM country ORDER BY name ASC', (error, results) => {
+        if (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        res.status(200).json(results.rows);
+    });
+});
+
+// fetch actors
+app.get('/actors', (req, res) => {
+    const searchTerm = req.query.searchTerm || '';
+    const query = `
+        SELECT * FROM actor
+        WHERE name ILIKE $1
+        ORDER BY name ASC
+    `;
+    const values = [`%${searchTerm}%`];
+
+    pool.query(query, values, (error, results) => {
+        if (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        res.status(200).json(results.rows);
+    });
+});
+
 app.get('/dramas', (req, res) => {
-    const page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
-    const limit = parseInt(req.query.limit) || 12; // Default to 12 items per page if not provided
-    const offset = (page - 1) * limit; // Calculate the offset for pagination
-    const platform = req.query.platform || ''; // Get platform from query params, default to empty string
-    const year = req.query.year || ''; // Get year from query params, default to empty string
-    const genre = req.query.genre || ''; // Get genre from query params, default to empty string
-    const title = req.query.title || ''; // Get title from query params, default to empty string
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 12;
+    const offset = (page - 1) * limit;
+    const platform = req.query.platform || '';
+    const year = req.query.year || '';
+    const genre = req.query.genre || '';
+    const title = req.query.title || '';
+    const country_id = req.query.country_id || null;
+    const sort = req.query.sort || ''; // Default sorting
+
+    let orderBy;
+    switch (sort) {
+        case 'title_asc':
+            orderBy = 'd.title ASC';
+            break;
+        case 'title_desc':
+            orderBy = 'd.title DESC';
+            break;
+        case 'date_asc':
+            orderBy = 'd.year ASC';
+            break;
+        case 'date_desc':
+            orderBy = 'd.year DESC';
+            break;
+        default:
+            orderBy = 'd.title ASC';
+    }
 
     const query = `
-        SELECT 
-            d.*,
-            ARRAY_AGG(g.genre) AS genres
-        FROM 
-            dramav2 d
-        JOIN 
-            drama_genre dg ON d.id = dg.drama_id
-        JOIN 
-            genre g ON dg.genre_id = g.id
-        WHERE 
-            d.availability ILIKE '%' || $3 || '%'
-        AND
-            d.year ILIKE '%' || $4 || '%'
-        AND
-            ($6 = '' OR (d.title ILIKE '%' || $6 || '%' OR d.actors ILIKE '%' || $6 || '%'))
-        GROUP BY 
-            d.id
+        SELECT d.*, ARRAY_AGG(g.genre) AS genres
+        FROM dramav2 d
+        JOIN drama_genre dg ON d.id = dg.drama_id
+        JOIN genre g ON dg.genre_id = g.id
+        WHERE d.availability ILIKE '%' || $3 || '%'
+        AND d.year ILIKE '%' || $4 || '%'
+        AND ($6 = '' OR (d.title ILIKE '%' || $6 || '%' OR d.actors ILIKE '%' || $6 || '%'))
+        AND ($7::int IS NULL OR d.country_id = $7::int)
+        GROUP BY d.id
         HAVING ($5 = '' OR $5 = ANY(ARRAY_AGG(g.genre)))
-        ORDER BY
-            d.title
+        ORDER BY ${orderBy}
         LIMIT $1 OFFSET $2;
     `;
 
     const countQuery = `
-        SELECT 
-            COUNT(*)
-        FROM 
-            dramav2 d
-        JOIN 
-            drama_genre dg ON d.id = dg.drama_id
-        JOIN 
-            genre g ON dg.genre_id = g.id
-        WHERE 
-            d.availability ILIKE '%' || $1 || '%'
-        AND
-            d.year ILIKE '%' || $2 || '%'
-        AND
-            ($4 = '' OR (d.title ILIKE '%' || $4 || '%' OR d.actors ILIKE '%' || $4 || '%'))
-        GROUP BY 
-            d.id
+        SELECT COUNT(*)
+        FROM dramav2 d
+        JOIN drama_genre dg ON d.id = dg.drama_id
+        JOIN genre g ON dg.genre_id = g.id
+        WHERE d.availability ILIKE '%' || $1 || '%'
+        AND d.year ILIKE '%' || $2 || '%'
+        AND ($4 = '' OR (d.title ILIKE '%' || $4 || '%' OR d.actors ILIKE '%' || $4 || '%'))
+        AND ($5::int IS NULL OR d.country_id = $5::int)
+        GROUP BY d.id
         HAVING ($3 = '' OR $3 = ANY(ARRAY_AGG(g.genre)));
     `;
 
-    pool.query(query, [limit, offset, platform, year, genre, title], (error, results) => {
+    pool.query(query, [limit, offset, platform, year, genre, title, country_id], (error, results) => {
         if (error) {
-            console.error(error); // Log the error to the console
+            console.error(error);
             return res.status(500).json({ error: 'Internal Server Error' });
         }
-
-        pool.query(countQuery, [platform, year, genre, title], (error, countResults) => {
+        pool.query(countQuery, [platform, year, genre, title, country_id], (error, countResults) => {
             if (error) {
-                console.error(error); // Log the error to the console
+                console.error(error);
                 return res.status(500).json({ error: 'Internal Server Error' });
             }
-
             res.status(200).json({ dramas: results.rows, total: countResults.rowCount });
         });
     });
@@ -141,24 +203,26 @@ app.get('/dramas/:id', (req, res) => {
     // Mengambil drama id dari parameter URL dan memvalidasinya
     const dramaId = parseInt(req.params.id, 10);
     console.log(`Fetching drama with ID: ${dramaId}`); 
+
+    // use isNan from js to check if dramaId is an integer
     if (isNaN(dramaId)) {
-        return res.status(400).json({ error: 'Invalid drama ID' }); // Mengembalikan 400 jika ID tidak valid
+        return res.status(400).json({ error: 'Invalid drama ID' });
     }
 
     const query = `
         SELECT 
             d.*, 
             ARRAY_AGG(DISTINCT g.genre) AS genres,
-            ARRAY_AGG(DISTINCT jsonb_build_object('id', a.id, 'name', a.name, 'country_id', a.country_id, 'birth_date', a.birth_date, 'url_photo', a.url_photo)) AS actors
+            ARRAY_AGG(DISTINCT jsonb_build_object('id', a.id, 'name', a.name, 'country_id', a.country_id, 'birth_date', a.birth_date, 'url_photo', a.url_photo)) FILTER (WHERE a.id IS NOT NULL) AS actors
         FROM 
             dramav2 d
         JOIN 
             drama_genre dg ON d.id = dg.drama_id
         JOIN 
             genre g ON dg.genre_id = g.id
-        JOIN 
+        LEFT JOIN 
             drama_actor da ON d.id = da.drama_id
-        JOIN 
+        LEFT JOIN 
             actor a ON da.actor_id = a.id
         WHERE 
             d.id = $1
@@ -181,10 +245,169 @@ app.get('/dramas/:id', (req, res) => {
     });
 });
 
+// Endpoint to toggle the watchlist status
+app.post('/watchlist/toggle', async (req, res) => {
+    const { user_id, drama_id } = req.body;
+
+    // check if user_id and drama_id are integers with isNaN from js
+    if (isNaN(user_id) || isNaN(drama_id)) {
+        return res.status(400).json({ error: 'Invalid user or drama ID' });
+    }
+  
+    try {
+      const result = await pool.query(
+        'SELECT * FROM user_watchlist WHERE user_id = $1 AND drama_id = $2',
+        [user_id, drama_id]
+      );
+  
+      if (result.rows.length > 0) {
+        // Drama is already in watchlist, remove it
+        await pool.query(
+          'DELETE FROM user_watchlist WHERE user_id = $1 AND drama_id = $2',
+          [user_id, drama_id]
+        );
+        return res.json({ message: 'Removed from watchlist' });
+      } else {
+        // Drama is not in watchlist, add it
+        await pool.query(
+          'INSERT INTO user_watchlist (user_id, drama_id) VALUES ($1, $2)',
+          [user_id, drama_id]
+        );
+        return res.json({ message: 'Added to watchlist' });
+      }
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+  
+// create an endpoint to get the user's watchlist from table user_watchlist, just get the list of drama_id
+app.get('/watchlist/check', async (req, res) => {
+    const { user_id, drama_id } = req.query; // Get user and drama IDs from query params
+
+    // check if user_id and drama_id are integers with isNaN from js
+    if (isNaN(user_id) || isNaN(drama_id)) {
+        return res.status(400).json({ error: 'Invalid user or drama ID' });
+    }
+  
+    try {
+      const result = await pool.query(
+        'SELECT * FROM user_watchlist WHERE user_id = $1 AND drama_id = $2',
+        [user_id, drama_id]
+      );
+  
+      // If a record exists, the drama is already watchlisted
+      if (result.rows.length > 0) {
+        return res.json({ isWatchlisted: true });
+      } else {
+        return res.json({ isWatchlisted: false });
+      }
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+  // Endpoint to fetch all dramas watchlisted by the user
+app.get('/watchlist', async (req, res) => {
+    const { user_id } = req.query; // Get user ID from query params
+
+    // check if user_id is an integer with isNaN from js
+    if (isNaN(user_id)) {
+        return res.status(400).json({ error: 'Invalid user ID' });
+    }
+  
+    try {
+      const result = await pool.query(
+        'SELECT d.* FROM dramav2 d INNER JOIN user_watchlist w ON d.id = w.drama_id WHERE w.user_id = $1',
+        [user_id]
+      );
+  
+      return res.json(result.rows); // Return the watchlisted dramas
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
+
+// Google authentication endpoint
+app.post('/auth/google', async (req, res) => {
+    const { idToken } = req.body; // Get idToken from request body
+
+    try {
+        const ticket = await client.verifyIdToken({
+            idToken,
+            audience: process.env.GOOGLE_CLIENT_ID // Specify the CLIENT_ID of the app that accesses the backend
+        });
+        const payload = ticket.getPayload(); // Get user info from the token
+
+        const { email, name } = payload;
+
+        // Check if user exists in the database
+        const user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+        
+        if (user.rows.length === 0) {
+            // If user does not exist, create a new user
+            const date = new Date();
+            const newUser = await pool.query(
+                'INSERT INTO users (username, email, role_id, created_at) VALUES ($1, $2, 1, $3) RETURNING *',
+                [name, email, date]
+            );
+
+            const userId = newUser.rows[0].id; // Get the new user ID
+            
+            // Sign JWT
+            const token = jwt.sign(
+                { id: userId, username: name, role: 1 },
+                process.env.JWT_SECRET,
+                { expiresIn: '1h' }
+            );
+
+            return res.json({ token });
+        } else {
+            // User exists: reject login if they have a password
+            const existingUser = user.rows[0];
+            
+            if (existingUser.password) {
+                // If the existing user has a password, reject the login
+                return res.status(400).json({ error: 'An account with this email already exists. Please log in using your username and password.' });
+            }
+            // If user does not have a password, they may already be registered via Google
+            // (this condition should ideally not be met unless you've created users without passwords)
+        }
+
+        // If we reach here, it means the user exists but has no password,
+        // and we can optionally provide a response or redirect.
+        // sign jwt for the user with id and username and role
+        const token = jwt.sign(
+            { id: user.rows[0].id, username: user.rows[0].username, role: user.rows[0].role_id },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+        res.json({ token });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 // Login endpoint
 app.post('/auth/login', async (req, res) => {
     const { username, password } = req.body;
+
+    // sanitize input
+    if (!validator.isAlphanumeric(username)) {
+        return res.status(400).json({ error: 'Invalid username' });
+    }
+    // check if password is empty
+    if (!password) {
+        return res.status(400).json({ error: 'Password is required' });
+    }
+
+    // sanitize username and password from escapeHTML
+    const sanitizedUsername = escapeHTML(username);
+    const sanitizedPassword = escapeHTML(password);
 
     try {
         // Check if user exists
@@ -193,19 +416,15 @@ app.post('/auth/login', async (req, res) => {
             return res.status(400).json({ error: 'Invalid credentials or account banned' });
         }
 
-        // Compare password
-        const isMatch = await bcrypt.compare(password, user.rows[0].password);
+        const isMatch = await bcrypt.compare(sanitizedPassword, user.rows[0].password);
         if (!isMatch) {
             return res.status(400).json({ error: 'Invalid credentials' });
         }
 
-        console.log(process.env.JWT_SECRET);
-
-        // Create and sign JWT
         const token = jwt.sign(
             { id: user.rows[0].id, username: user.rows[0].username, role: user.rows[0].role_id },
             process.env.JWT_SECRET,
-            { expiresIn: '1h' } // Token expires in 1 hour
+            { expiresIn: '1h' }
         );
 
         res.json({ token });
@@ -215,28 +434,46 @@ app.post('/auth/login', async (req, res) => {
     }
 });
 
-// endpoint to register new user to users table (params: username, password, email), role_id will always be 1
+// Register endpoint
 app.post('/auth/register', async (req, res) => {
     const { username, password, email } = req.body;
 
+    // sanitize input
+    if (!validator.isAlphanumeric(username)) {
+        return res.status(400).json({ error: 'Invalid username' });
+    }
+    // check if password length is less than 8
+    if (password.length < 8) {
+        return res.status(400).json({ error: 'Password must be at least 8 characters long' });
+    }
+    // check email
+    if (!validator.isEmail(email)) {
+        return res.status(400).json({ error: 'Invalid email' });
+    }
+
+    // sanitize username and password from escapeHTML
+    const sanitizedUsername = escapeHTML(username);
+    const sanitizedPassword = escapeHTML(password);
+    const sanitizedEmail = escapeHTML(email);
+
     try {
-        // Check if user already exists
-        const user = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        const user = await pool.query('SELECT * FROM users WHERE username = $1', [sanitizedUsername]);
         if (user.rows.length > 0) {
             return res.status(400).json({ error: 'User already exists' });
         }
 
-        // Hash password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        // check if password is empty
+        if (!sanitizedPassword) {
+            return res.status(400).json({ error: 'Password is required' });
+        }
 
-        // Create date of now to fill created_at column
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(sanitizedPassword, salt);
         const date = new Date();
 
-        // Insert new user into users table
         const newUser = await pool.query(
             'INSERT INTO users (username, password, email, role_id, created_at) VALUES ($1, $2, $3, 1, $4) RETURNING *',
-            [username, hashedPassword, email, date]
+            [sanitizedUsername, hashedPassword, sanitizedEmail, date]
         );
 
         res.json(newUser.rows[0]);
@@ -458,17 +695,6 @@ app.delete('/actor/:id', async (req, res) => {
     }
 });
 
-// Endpoint to fetch distinct years from dramav2 table
-app.get('/year', async (req, res) => {
-    try {
-        const { rows } = await pool.query('SELECT DISTINCT year FROM dramav2 ORDER BY year DESC');
-        res.json(rows);
-    } catch (error) {
-        console.error(error.message);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-
 // Endpoint to fetch awards
 app.get('/award', async (req, res) => {
     try {
@@ -522,6 +748,69 @@ app.delete('/users/:id', async (req, res) => {
     } catch (error) {
         console.error(error.message);
         res.status(500).json({ message: "Error deleting user" });
+// Create endpoint for creating a new drama with POST method
+app.post('/new_drama', async (req, res) => {
+    const { title, alt_title, year, synopsis, url_photo, country_id, availability, genres, actors, trailer_link } = req.body;
+    console.log(req.body);
+
+    // Check if title is empty
+    if (!title) {
+        return res.status(400).json({ error: 'Title is required' });
+    }
+
+    const client = await pool.connect();
+
+    try {
+        await client.query('BEGIN');
+
+        // actors is an array of actor id, so we need to convert it to an array of actor name
+        const actorQuery = `
+            SELECT name FROM actor WHERE id = ANY($1::int[]);
+        `;
+        const actorResult = await client.query(actorQuery, [actors]);
+
+        // Insert new drama into dramav2 table
+        const insertDramaQuery = `
+            INSERT INTO dramav2 (title, alternative_title, year, synopsis, url_photo, country_id, availability, actors, link_trailer)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            RETURNING id;
+        `;
+        const dramaResult = await client.query(insertDramaQuery, [title, alt_title, year, synopsis, url_photo, country_id, availability, actorResult.rows.map(row => row.name), trailer_link]);
+        const dramaId = dramaResult.rows[0].id;
+
+        // Get genre IDs from genrev2 table
+        const genreQuery = `
+            SELECT id FROM genrev2 WHERE genre_name = ANY($1::text[]);
+        `;
+        const genreResult = await client.query(genreQuery, [genres]);
+        const genreIds = genreResult.rows.map(row => row.id);
+
+        // Insert genres into drama_genre table
+        const insertGenreQuery = `
+            INSERT INTO drama_genre (drama_id, genre_id)
+            VALUES ($1, $2);
+        `;
+        for (const genreId of genreIds) {
+            await client.query(insertGenreQuery, [dramaId, genreId]);
+        }
+
+        // Insert actors into drama_actor table
+        const insertActorQuery = `
+            INSERT INTO drama_actor (drama_id, actor_id)
+            VALUES ($1, $2);
+        `;
+        for (const actorId of actors) {
+            await client.query(insertActorQuery, [dramaId, actorId]);
+        }
+
+        await client.query('COMMIT');
+        res.status(201).json({ message: 'New drama created successfully', dramaId });
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Error creating new drama:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    } finally {
+        client.release();
     }
 });
 

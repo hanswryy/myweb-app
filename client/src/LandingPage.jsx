@@ -3,10 +3,12 @@ import Card from './components/Card';
 import SideBarMain from './components/SideBarMain';
 // import jwt decode from 'jwt-decode';
 import { jwtDecode } from 'jwt-decode';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 function LandingPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [years, setYears] = useState([]);
+  const [genres, setGenres] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
   const [dramas, setDramas] = useState([]);
   const [currentPage, setCurrentPage] = useState(1); // Current page state
@@ -17,12 +19,36 @@ function LandingPage() {
     year: "",
     genre: "",
     platform: "",
-    title: ""
+    title: "",
+    country_id: "",
+    sort: "title_asc"
   });
   const [role, setRole] = useState(null); // Role of the user
+  const [userID, setUserID] = useState(null); // User ID
   const [isLoggedIn, setIsLoggedIn] = useState(false); // User logged in state
+  const [localStorageInitialized, setLocalStorageInitialized] = useState(false);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const savedFilters = JSON.parse(localStorage.getItem('dramaFilters'));
+    const savedSearchTerm = localStorage.getItem('searchTerm');
+
+    if (savedFilters) setFilters(savedFilters);
+    if (savedSearchTerm) setSearchTerm(savedSearchTerm);
+
+    setLocalStorageInitialized(true);
+
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Save filters and page number to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('dramaFilters', JSON.stringify(filters));
+    localStorage.setItem('searchTerm', searchTerm);
+  }, [filters, searchTerm]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -30,6 +56,7 @@ function LandingPage() {
       try {
         const decodedToken = jwtDecode(token);
         setRole(decodedToken.role); // Extract role from token
+        setUserID(decodedToken.id); // Extract user ID from token
         setIsLoggedIn(true); // Set user as logged in
       } catch (error) {
         console.error("Invalid token");
@@ -38,6 +65,10 @@ function LandingPage() {
   }, []);
 
   useEffect(() => {
+    if (!localStorageInitialized) {
+      return;
+    }
+
     const fetchDramasAndCount = async () => {
       const query = new URLSearchParams({
         page: currentPage,
@@ -72,11 +103,18 @@ function LandingPage() {
   const totalPages = Math.ceil(totalCount / dramasPerPage); // Calculate total pages
 
   const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      [name]: value,
-    }));
+    if (e.target) {
+      const { name, value } = e.target;
+      setFilters((prevFilters) => ({
+        ...prevFilters,
+        [name]: value,
+      }));
+    } else {
+      setFilters((prevFilters) => ({
+        ...prevFilters,
+        country_id: e,
+      }));
+    }
   };
 
   const handleSearchChange = (e) => {
@@ -95,7 +133,52 @@ function LandingPage() {
     localStorage.removeItem('token');
     setIsLoggedIn(false);
     setRole(null);
+    window.location.reload();
   };
+
+  const [selectedOption, setSelectedOption] = useState("");
+
+  useEffect(() => {
+    handleFilterChange(selectedOption);
+  }, [selectedOption]);
+
+  const onFilterChange = (newOption) => {
+    console.log(`Filter changed to: ${newOption}`);
+    // Additional logic if needed
+  };
+
+  useEffect(() => {
+    onFilterChange(selectedOption);
+  }, [selectedOption]);
+
+  useEffect(() => {
+    const fetchYears = async () => {
+      try {
+        const response = await fetch('/years')
+        const data = await response.json();
+        setYears(data);
+      } catch (error) {
+        console.error("Error fetching years")
+      }
+    };
+
+    fetchYears();
+  }, []);
+
+  useEffect(() => {
+    const fetchGenres = async () => {
+      try {
+        const response = await fetch('/genres');
+        const data = await response.json();
+        setGenres(data);
+        console.log(data);
+      } catch {
+        console.error("Error fetching genres");
+      }
+    };
+
+    fetchGenres();
+  }, []);
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -153,8 +236,8 @@ function LandingPage() {
 
         <div className="flex space-x-4 mb-6">
           <div className="w-1/5 hidden lg:block fixed top-0 left-0 p-20 bg-blue-200">
-            <h1 className="text-2xl font-bold z-10">DramaKu</h1>
-            <SideBarMain selectedOption="dramas" />
+            <Link to="/"  className="text-2xl font-bold z-10" >DramaKu</Link>
+            <SideBarMain selectedOption={selectedOption} onOptionChange={setSelectedOption} />
           </div>
 
           <div className="lg:w-1/6"/>
@@ -182,10 +265,11 @@ function LandingPage() {
                         onChange={handleFilterChange}
                       >
                         <option value="">Year</option>
-                        {/* Add year options */}
-                        <option value="2021">2021</option>
-                        <option value="2020">2020</option>
-                        <option value="2019">2019</option>
+                        {years.map((year) => (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                        ))}
                       </select>
                       <select
                         name="genre"
@@ -194,56 +278,63 @@ function LandingPage() {
                         onChange={handleFilterChange}
                       >
                         <option value="">Genre</option>
-                        {/* Add genre options */}
-                        <option value="Action">Action</option>
-                        <option value="Comedy">Comedy</option>
-                        <option value="Drama">Drama</option>
+                        {genres.map((genre) => (
+                        <option key={genre} value={genre}>
+                          {genre}
+                        </option>
+                        ))}
                       </select>
-                      <select
+                      {/* <select
                         name="status"
                         className="border border-gray-300 rounded px-4 py-2"
                         value={filters.status}
                         onChange={handleFilterChange}
                       >
                         <option value="">Status</option>
-                        {/* Add status options */}
-                      </select>
-                      <select
-                        name="platform"
-                        className="border border-gray-300 rounded px-4 py-2"
-                        value={filters.platform}
-                        onChange={handleFilterChange}
-                      >
-                        <option value="">Availability</option>
-                        {/* Add availability options */}
-                        <option value="Netflix">Netflix</option>
-                        <option value="Prime">Amazon Prime</option>
-                        <option value="Crunchyroll">Crunchyroll</option>
-                      </select>
-                      <select
+                      </select> */}
+                    <select
+                      name="platform"
+                      className="border border-gray-300 rounded px-4 py-2"
+                      value={filters.platform}
+                      onChange={handleFilterChange}
+                    >
+                      <option value="">Availability</option>
+                      {/* Add availability options */}
+                      <option value="Netflix">Netflix</option>
+                      <option value="Prime">Amazon Prime</option>
+                      <option value="Crunchyroll">Crunchyroll</option>
+                      {/* add for another option (Bstation, Apple TV, Hulu, Viu, Disney) */}
+                      <option value="Bstation">Bstation</option>
+                      <option value="Apple">Apple TV</option>
+                      <option value="Hulu">Hulu</option>
+                      <option value="Viu">Viu</option>
+                      <option value="Disney">Disney</option>
+                    </select>
+                      {/* <select
                         name="award"
                         className="border border-gray-300 rounded px-4 py-2"
                         value={filters.award}
                         onChange={handleFilterChange}
                       >
                         <option value="">Award</option>
-                        {/* Add award options */}
-                      </select>
+                      </select> */}
                       <select
-                        name="sortBy"
+                        name="sort"
                         className="border border-gray-300 rounded px-4 py-2"
-                        value={filters.sortBy}
+                        value={filters.sort}
                         onChange={handleFilterChange}
                       >
-                        <option value="Alphabetics">Sorted by: Alphabetics</option>
-                        {/* Add other sorting options */}
+                        <option value="title_asc">Sorted by: Alphabetics Ascending</option>
+                        <option value="title_desc">Sorted by: Alphabetics Descending</option>
+                        <option value="date_asc">Sorted by: Year Ascending</option>
+                        <option value="date_desc">Sorted by: Year Descending</option>
                       </select>
-                      <button
+                      {/* <button
                         className="bg-blue-400 text-white px-4 py-2 rounded"
                         type="submit"
                       >
                         Submit
-                      </button>
+                      </button> */}
                     </form>
                   )}
                 </div>
@@ -251,15 +342,17 @@ function LandingPage() {
                 <form className="flex flex-row space-x-2 mb-4 flex-wrap" onSubmit={handleSubmit}>
                   <select
                     name="year"
-                    className="border border-gray-300 rounded px-4 py-2"
+                    className="border border-gray-300 rounded px-4 py-2 overflow-x-auto"
                     value={filters.year}
                     onChange={handleFilterChange}
                   >
                     <option value="">Year</option>
                     {/* Add year options */}
-                    <option value="2021">2021</option>
-                    <option value="2020">2020</option>
-                    <option value="2019">2019</option>
+                    {years.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                    ))}
                   </select>
                   <select
                     name="genre"
@@ -269,19 +362,20 @@ function LandingPage() {
                   >
                     <option value="">Genre</option>
                     {/* Add genre options */}
-                    <option value="Action">Action</option>
-                    <option value="Comedy">Comedy</option>
-                    <option value="Drama">Drama</option>
+                    {genres.map((genre) => (
+                    <option key={genre} value={genre}>
+                      {genre}
+                    </option>
+                    ))}
                   </select>
-                  <select
+                  {/* <select
                     name="status"
                     className="border border-gray-300 rounded px-4 py-2"
                     value={filters.status}
                     onChange={handleFilterChange}
                   >
                     <option value="">Status</option>
-                    {/* Add status options */}
-                  </select>
+                  </select> */}
                   <select
                     name="platform"
                     className="border border-gray-300 rounded px-4 py-2"
@@ -293,38 +387,45 @@ function LandingPage() {
                     <option value="Netflix">Netflix</option>
                     <option value="Prime">Amazon Prime</option>
                     <option value="Crunchyroll">Crunchyroll</option>
+                    {/* add for another option (Bstation, Apple TV, Hulu, Viu, Disney) */}
+                    <option value="Bstation">Bstation</option>
+                    <option value="Apple">Apple TV</option>
+                    <option value="Hulu">Hulu</option>
+                    <option value="Viu">Viu</option>
+                    <option value="Disney">Disney</option>
                   </select>
-                  <select
+                  {/* <select
                     name="award"
                     className="border border-gray-300 rounded px-4 py-2"
                     value={filters.award}
                     onChange={handleFilterChange}
                   >
                     <option value="">Award</option>
-                    {/* Add award options */}
-                  </select>
+                  </select> */}
                   <select
-                    name="sortBy"
+                    name="sort"
                     className="border border-gray-300 rounded px-4 py-2"
-                    value={filters.sortBy}
+                    value={filters.sort}
                     onChange={handleFilterChange}
                   >
-                    <option value="Alphabetics">Sorted by: Alphabetics</option>
-                    {/* Add other sorting options */}
+                    <option value="title_asc">Sorted by: Alphabetics Ascending</option>
+                    <option value="title_desc">Sorted by: Alphabetics Descending</option>
+                    <option value="date_asc">Sorted by: Year Ascending</option>
+                    <option value="date_desc">Sorted by: Year Descending</option>
                   </select>
-                  <button
+                  {/* <button
                     className="bg-blue-400 text-white px-4 py-2 rounded"
                     type="submit"
                   >
                     Submit
-                  </button>
+                  </button> */}
                 </form>
               )}
             </div>
 
               <div className={searchTerm ? "space-y-4" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"}>
                 {dramas.map(drama => (
-                  <Card key={drama.id} drama={drama} />
+                  <Card key={drama.id} drama={drama} user={userID} />
                 ))}
               </div>
 
