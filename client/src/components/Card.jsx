@@ -76,7 +76,6 @@ const Card = ({ drama, user, onToggleWatchlist }) => {
         <p className="text-xs text-gray-700">{drama?.genres?.join(", ") || "Genres not available"}</p>
         <div className="flex justify-between text-xs text-gray-500 mt-2">
           <p>Rate {drama?.rating || "N/A"}/5</p>
-          <p>{drama?.views || "0"} views</p>
         </div>
       </div>
       {user && (

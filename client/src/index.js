@@ -10,6 +10,7 @@ import LandingPage from './LandingPage';
 import DetailPage from './DetailPage';
 import CMSDrama from './CMSDrama';
 import CMSInputDrama from './CMSInputDrama';
+import CMSUpdateDrama from './CMSUpdateDrama';
 import CMSComments from './CMSComments';
 import CMSCountries from './CMSCountries';
 import CMSAwards from './CMSAwards';
@@ -75,6 +76,7 @@ root.render(
         } 
       />
       <Route path="/cms/input" element={<CMSInputDrama />} />
+      <Route path="/cms/update/:id" element={<CMSUpdateDrama />} />
       <Route path="/cms/countries" element={<CMSCountries />} />
       <Route path="/cms/comments" element={<CMSComments />} />
       <Route path="/cms/awards" element={<CMSAwards />} />

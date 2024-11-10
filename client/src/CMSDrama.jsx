@@ -2,13 +2,17 @@ import React, { useRef, useEffect } from "react";
 import Actor from './components/Actor';
 import SideBarCMS from "./components/SideBarCMS";
 import Review from './components/Review';
+import { useNavigate } from 'react-router-dom';
 
 import placeholder from "./images/video_player_placeholder.png";
 import ikuyo from "./images/ikuyoo.jpeg";
 
 function CMSDrama() {
     const [showModal, setShowModal] = React.useState(false);
+    const [dramas, setDramas] = React.useState([]);
     const modalRef = useRef(null);
+
+    const navigate = useNavigate();
 
     // Close modal when clicking outside of it
     useEffect(() => {
@@ -26,6 +30,38 @@ function CMSDrama() {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [showModal]);
+
+    useEffect(() => {
+        // create a func to fetch drama from /dramas
+        const fetchDramas = async () => {
+            try {
+                // fetch ALL drama without limit and offset (pagination is setted, so please set the limit and offset)
+                const response = await fetch('/dramas?limit=200&offset=0');
+                const data = await response.json();
+                setDramas(data.dramas || []);
+                console.log(data);
+            }
+            catch (error) {
+                console.log(error);
+            }
+        }
+        fetchDramas();
+    } , []);
+
+    const handleDelete = async (id) => {
+        // goes to /delete_drama/:id
+        try {
+            const response = await fetch(`/delete_drama/${id}`, {
+                method: 'DELETE',
+            });
+            if (response.ok) {
+                const newDramas = dramas.filter((drama) => drama.id !== id);
+                setDramas(newDramas);
+            }
+        } catch (error) {
+            console.error('Failed to delete drama:', error);
+        }
+    }
 
     return(
         <div>
@@ -79,30 +115,31 @@ function CMSDrama() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                <tr className="bg-red-50 text-sm lg:text-base">
-                                    <td className="px-6 py-4">
-                                        1
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <a id="validate">[2024] Japan - Eye Love You</a>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        Takuya Kimura, Takeuchi Yuko, Neinen Reina
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        Romance, Adventure, Comedy
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        I love this drama. It taught me a lot about money and finance. Love is not everything. We need to face the reality too. Being stoic is the best.
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        Unapproved
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <button className="text-blue-600 hover:underline" onClick={() => setShowModal(true)}>Edit</button> | 
-                                        <a href="#" className="text-red-600 hover:underline">Delete</a>
-                                    </td>
-                                </tr>
+                                    {/* use drama state as list */}
+                                    {dramas.map((drama, index) => (
+                                        <tr key={drama.id} className="bg-gray-100 text-gray-600">
+                                            <td className="px-6 py-4">{index + 1}</td>
+                                            <td className="px-6 py-4">{drama.title}</td>
+                                            <td className="px-6 py-4">{drama.actors}</td>
+                                            <td className="px-6 py-4">{drama.genres}</td>
+                                            <td className="px-6 py-4">{drama.synopsis}</td>
+                                            <td className="px-6 py-4">{drama.status}</td>
+                                            <td className="px-6 py-4">
+                                                <button
+                                                    className="bg-blue-500 text-white px-4 py-1 rounded-xl"
+                                                    onClick={() => navigate(`/cms/update/${drama.id}`)}
+                                                    >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    className="bg-red-500 text-white px-4 py-1 rounded-xl"
+                                                    onClick={() => handleDelete(drama.id)}
+                                                    >
+                                                    Delete
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
                                 </tbody>
                             </table>
                         </div>

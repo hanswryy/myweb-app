@@ -156,16 +156,16 @@ app.get('/dramas', (req, res) => {
     }
 
     const query = `
-        SELECT d.*, ARRAY_AGG(g.genre) AS genres
+        SELECT d.*, ARRAY_AGG(g.genrev2) AS genres
         FROM dramav2 d
         JOIN drama_genre dg ON d.id = dg.drama_id
-        JOIN genre g ON dg.genre_id = g.id
+        JOIN genrev2 g ON dg.genre_id = g.id
         WHERE d.availability ILIKE '%' || $3 || '%'
         AND d.year ILIKE '%' || $4 || '%'
         AND ($6 = '' OR (d.title ILIKE '%' || $6 || '%' OR d.actors ILIKE '%' || $6 || '%'))
         AND ($7::int IS NULL OR d.country_id = $7::int)
         GROUP BY d.id
-        HAVING ($5 = '' OR $5 = ANY(ARRAY_AGG(g.genre)))
+        HAVING ($5 = '' OR $5 = ANY(ARRAY_AGG(g.genre_name)))
         ORDER BY ${orderBy}
         LIMIT $1 OFFSET $2;
     `;
@@ -174,13 +174,13 @@ app.get('/dramas', (req, res) => {
         SELECT COUNT(*)
         FROM dramav2 d
         JOIN drama_genre dg ON d.id = dg.drama_id
-        JOIN genre g ON dg.genre_id = g.id
+        JOIN genrev2 g ON dg.genre_id = g.id
         WHERE d.availability ILIKE '%' || $1 || '%'
         AND d.year ILIKE '%' || $2 || '%'
         AND ($4 = '' OR (d.title ILIKE '%' || $4 || '%' OR d.actors ILIKE '%' || $4 || '%'))
         AND ($5::int IS NULL OR d.country_id = $5::int)
         GROUP BY d.id
-        HAVING ($3 = '' OR $3 = ANY(ARRAY_AGG(g.genre)));
+        HAVING ($3 = '' OR $3 = ANY(ARRAY_AGG(g.genre_name)));
     `;
 
     pool.query(query, [limit, offset, platform, year, genre, title, country_id], (error, results) => {
@@ -212,14 +212,14 @@ app.get('/dramas/:id', (req, res) => {
     const query = `
         SELECT 
             d.*, 
-            ARRAY_AGG(DISTINCT g.genre) AS genres,
+            ARRAY_AGG(DISTINCT g.genre_name) AS genres,
             ARRAY_AGG(DISTINCT jsonb_build_object('id', a.id, 'name', a.name, 'country_id', a.country_id, 'birth_date', a.birth_date, 'url_photo', a.url_photo)) FILTER (WHERE a.id IS NOT NULL) AS actors
         FROM 
             dramav2 d
         JOIN 
             drama_genre dg ON d.id = dg.drama_id
         JOIN 
-            genre g ON dg.genre_id = g.id
+            genrev2 g ON dg.genre_id = g.id
         LEFT JOIN 
             drama_actor da ON d.id = da.drama_id
         LEFT JOIN 
@@ -812,6 +812,98 @@ app.post('/new_drama', async (req, res) => {
     } catch (error) {
         await client.query('ROLLBACK');
         console.error('Error creating new drama:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    } finally {
+        client.release();
+    }
+});
+
+// Create endpoint for updating an existing drama with PUT method
+app.put('/update_drama/:id', async (req, res) => {
+    const { id } = req.params;
+    const { title, alt_title, year, synopsis, url_photo, country_id, availability, genres, actors, trailer_link } = req.body;
+
+    const client = await pool.connect();
+
+    try {
+        await client.query('BEGIN');
+
+        // Update existing drama in dramav2 table
+        const updateDramaQuery = `
+            UPDATE dramav2
+            SET title = $1, alternative_title = $2, year = $3, synopsis = $4, url_photo = $5, country_id = $6, availability = $7, actors = $8, link_trailer = $9
+            WHERE id = $10
+            RETURNING id;
+        `;
+        const dramaResult = await client.query(updateDramaQuery, [title, alt_title, year, synopsis, url_photo, country_id, availability, actors, trailer_link, id]);
+        const dramaId = dramaResult.rows[0].id;
+
+        // Delete existing genres and actors associations
+        await client.query('DELETE FROM drama_genre WHERE drama_id = $1', [dramaId]);
+        await client.query('DELETE FROM drama_actor WHERE drama_id = $1', [dramaId]);
+
+        // Get genre IDs from genrev2 table
+        const genreQuery = `
+            SELECT id FROM genrev2 WHERE genre_name = ANY($1::text[]);
+        `;
+        const genreResult = await client.query(genreQuery, [genres]);
+        const genreIds = genreResult.rows.map(row => row.id);
+
+        // Insert genres into drama_genre table
+        const insertGenreQuery = `
+            INSERT INTO drama_genre (drama_id, genre_id)
+            VALUES ($1, $2);
+        `;
+        for (const genreId of genreIds) {
+            await client.query(insertGenreQuery, [dramaId, genreId]);
+        }
+
+        // Insert actors into drama_actor table
+        const insertActorQuery = `
+            INSERT INTO drama_actor (drama_id, actor_id)
+            VALUES ($1, $2);
+        `;
+        for (const actorId of actors) {
+            await client.query(insertActorQuery, [dramaId, actorId]);
+        }
+
+        await client.query('COMMIT');
+        res.status(200).json({ message: 'Drama updated successfully', dramaId });
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Error updating drama:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    } finally {
+        client.release();
+    }
+});
+
+// Create endpoint for deleting an existing drama with DELETE method
+app.delete('/delete_drama/:id', async (req, res) => {
+    const { id } = req.params;
+
+    const client = await pool.connect();
+
+    try {
+        await client.query('BEGIN');
+
+        // Delete associated genres and actors
+        await client.query('DELETE FROM drama_genre WHERE drama_id = $1', [id]);
+        await client.query('DELETE FROM drama_actor WHERE drama_id = $1', [id]);
+
+        // Delete the drama
+        const deleteDramaQuery = `
+            DELETE FROM dramav2
+            WHERE id = $1
+            RETURNING id;
+        `;
+        const dramaResult = await client.query(deleteDramaQuery, [id]);
+
+        await client.query('COMMIT');
+        res.status(200).json({ message: 'Drama deleted successfully', dramaId: dramaResult.rows[0].id });
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error('Error deleting drama:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     } finally {
         client.release();
