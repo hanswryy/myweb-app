@@ -75,16 +75,6 @@ app.get('/count', (req, res) => {
     });
 });
 
-app.get('/years', (req, res) => {
-    pool.query('SELECT DISTINCT year FROM dramav2 ORDER BY year DESC', (error, results) => {
-        if (error) {
-            console.error(error);
-            return res.status(500).json({ error: 'Internal Server Error' });
-        }
-        res.status(200).json(results.rows.map(row => row.year));
-    });
-});
-
 // fetch for genres
 app.get('/genres', (req, res) => {
     pool.query('SELECT genre_name FROM genrev2 ORDER BY genre_name ASC', (error, results) => {
@@ -696,15 +686,68 @@ app.delete('/actor/:id', async (req, res) => {
 });
 
 // Endpoint to fetch awards
-app.get('/award', async (req, res) => {
+app.get("/award", async (req, res) => {
     try {
-        const { rows } = await pool.query('SELECT * FROM award ORDER BY id DESC');
-        res.json(rows);
+      const result = await pool.query(`SELECT * FROM award ORDER BY id DESC`); // Ganti dengan query sesuai struktur database Anda
+      res.json(result.rows);
     } catch (error) {
-        console.error(error.message);
+      console.error("Error fetching awards:", error);
+      res.status(500).send("Server error");
+    }
+  });
+  
+app.post("/award", async (req, res) => {
+    const { award, year, country_id } = req.body;
+  
+    if (!award || !year || !country_id) {
+        return res.status(400).json({ error: 'Award, year, and country_id are required' });
+    }
+
+    try {
+        const newAward = await pool.query(
+            'INSERT INTO award (award, year, country_id) VALUES ($1, $2, $3) RETURNING *',
+            [award, year, country_id]
+        );
+        res.status(201).json(newAward.rows[0]);
+    } catch (error) {
+        console.error('Error adding award:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+  
+app.put("/award/:id", async (req, res) => {
+    const { id } = req.params;
+    const { award, year, country_id } = req.body;
+
+    if (!award || !year || !country_id) {
+        return res.status(400).json({ error: 'Award, year, and country_id are required' });
+    }
+  
+    try {
+      await pool.query(
+        'UPDATE award SET award = $1, year = $2, country_id = $3 WHERE id = $4 RETURNING *',
+        [award, year, country_id, id]
+      );
+      res.send("Award updated successfully");
+    } catch (error) {
+      console.error("Error updating award:", error);
+      res.status(500).send("Server error");
+    }
+});
+  
+app.delete("/award/:id", async (req, res) => {
+    const { id } = req.params;
+    try {
+      // Hapus data terkait dari tabel movie_award terlebih dahulu
+      await pool.query('DELETE FROM drama_award WHERE award_id = $1 RETURNING *', [id]);
+      // Lalu hapus dari tabel awards
+      await pool.query("DELETE FROM award WHERE id = $1", [id]);
+      res.send("Award deleted successfully");
+    } catch (error) {
+      console.error("Error deleting award:", error);
+      res.status(500).send("Server error");
+    }
+  });
 
 // get all users from users table
 app.get('/users', async (req, res) => {
@@ -731,7 +774,7 @@ app.put('/users/suspend/:id', async (req, res) => {
 app.put('/users/role/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        await pool.query('UPDATE users SET role_id = $1 WHERE id = $2', [0, id]); // Role admin sebagai contoh role_id 2
+        await pool.query('UPDATE users SET role_id = $1 WHERE id = $2', [0, id]); // Role admin sebagai contoh role_id 0
         res.status(200).json({ message: 'User role updated to admin' });
     } catch (error) {
         console.error(error.message);
