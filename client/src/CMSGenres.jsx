@@ -10,9 +10,10 @@ function Genres() {
   const [editName, setEditName] = useState('');
   const [loading, setLoading] = useState(true); // State untuk loading
   const [error, setError] = useState(null); // State untuk menyimpan error
-  const [showCount, setShowCount] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredGenres, setFilteredGenres] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1); // Menyimpan halaman aktif
+  const itemsPerPage = 10; // Jumlah item per halaman
 
   const fetchGenres = async () => {
     try {
@@ -113,9 +114,22 @@ function Genres() {
     }
   };
 
-  // Fungsi untuk mengubah jumlah item yang ditampilkan
-  const handleShowCountChange = (e) => {
-    setShowCount(Number(e.target.value));
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredGenres.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredGenres.length / itemsPerPage);
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
   };
 
   if (loading) {
@@ -165,8 +179,8 @@ function Genres() {
                 </div>
             </form>
 
-            <div className="flex flex-col lg:flex-row space-y-4 lg:space-x-2 mb-4 flex-wrap justify-between">
-                            <div className="flex flex-row">
+            <div className="flex flex-col lg:flex-row space-y-4 lg:space-x-2 mb-4 flex-wrap justify-end">
+                            {/* <div className="flex flex-row">
                                 <div className="flex items-center space-x-2">
                                     <label className="block text-base mb-2">Shows</label>
                                     <select className="border border-gray-300 rounded-md px-4 py-2 text-center" value={showCount} onChange={handleShowCountChange}>
@@ -177,7 +191,7 @@ function Genres() {
                                         <option>50</option>
                                     </select>
                                 </div>
-                            </div>  
+                            </div>   */}
                             <input
                                 type="text"
                                 placeholder="Search Genres"
@@ -196,9 +210,9 @@ function Genres() {
                 </tr>
               </thead>
               <tbody>
-              {filteredGenres.slice(0, showCount).map((genre, index) => (
+              {currentItems.map((genre, index) => (
                   <tr key={genre.id} className={index % 2 === 0 ? 'bg-red-50' : 'bg-gray-50'}>
-                    <td className="p-2">{index + 1}</td>
+                    <td className="p-2">{indexOfFirstItem + index + 1}</td>
                     <td className="p-2">
                     {editingGenre === genre.id ? (
                         <input
@@ -250,6 +264,27 @@ function Genres() {
                 ))}
               </tbody>
             </table>
+
+            <div className="flex justify-between items-center mt-4">
+              <button
+                onClick={goToPreviousPage}
+                disabled={currentPage === 1}
+                className="px-3 py-1 bg-gray-300 rounded-md text-gray-700"
+              >
+                Previous
+              </button>
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 bg-gray-300 rounded-md text-gray-700"
+              >
+                Next
+              </button>
+            </div>
+            
           </div>
         </div>
       </div>

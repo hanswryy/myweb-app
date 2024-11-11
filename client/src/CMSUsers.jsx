@@ -8,8 +8,11 @@ function Users() {
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [statusFilter, setStatusFilter] = useState("All");
-  const [showCount, setShowCount] = useState(10);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortColumn, setSortColumn] = useState("username"); // kolom yang sedang diurutkan
+  const [sortOrder, setSortOrder] = useState("asc"); // urutan pengurutan (asc/desc)
+  const [currentPage, setCurrentPage] = useState(1); // Menyimpan halaman aktif
+  const itemsPerPage = 10; // Jumlah item per halaman
 
   // Fungsi untuk melakukan fetching data users
   useEffect(() => {
@@ -27,7 +30,7 @@ function Users() {
 
   // Function untuk filter status dan jumlah data yang ditampilkan
   useEffect(() => {
-    const applyFilters = () => {
+    const applyFiltersAndSort = () => {
       let updatedUsers = users;
 
       // Filter berdasarkan status
@@ -42,28 +45,76 @@ function Users() {
         );
       }
 
+      // Sort users
+      updatedUsers = updatedUsers.sort((a, b) => {
+        if (sortOrder === "asc") {
+          return a[sortColumn] > b[sortColumn] ? 1 : -1;
+        } else {
+          return a[sortColumn] < b[sortColumn] ? 1 : -1;
+        }
+      });
+
       // Set data yang difilter sesuai jumlah yang akan ditampilkan
-      setFilteredUsers(updatedUsers.slice(0, showCount));
+      setFilteredUsers(updatedUsers);
     };
 
-    applyFilters();
-  }, [users, statusFilter, showCount, searchQuery]);
+    applyFiltersAndSort();
+  }, [users, statusFilter, searchQuery, sortColumn, sortOrder]);
 
-  const handleSuspendUser = async (id) => {
-    try {
-      await axios.put(`/users/suspend/${id}`);
-      setUsers(users.map(user => user.id === id ? { ...user, status: 'banned' } : user));
-    } catch (error) {
-      console.error("Error suspending user:", error);
+  const handleSuspendUser = async (id, username) => {
+    if (window.confirm(`Are you sure you want to banned ${username}?`)) {
+      try {
+        await axios.put(`/users/suspend/${id}`);
+        setUsers(users.map(user => user.id === id ? { ...user, status: 'banned' } : user));
+        // setUsers(users.filter(user => user.id !== id));
+        window.alert(`${username} has been successfully banned.`);
+      } catch (error) {
+        console.error("Error suspending user:", error);
+      }
     }
   };
 
-  const handleUpdateRoleToAdmin = async (id) => {
-    try {
-      await axios.put(`/users/role/${id}`);
-      setUsers(users.map(user => user.id === id ? { ...user, role_id: 0 } : user)); // Role_id 2 sebagai admin
-    } catch (error) {
-      console.error("Error updating role:", error);
+  const handleChangeRoleToAdmin = async (id, username) => {
+    if (window.confirm(`Are you sure you want to promote ${username} to Admin?`)) {
+      try {
+        await axios.put(`/users/role/${id}`);
+        setUsers(users.map(user => user.id === id ? { ...user, role_id: 0 } : user)); // Role_id 0 sebagai admin
+        window.alert(`${username} has been successfully promoted to Admin.`);
+      } catch (error) {
+        console.error("Error change role:", error);
+      }
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return `${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`;
+  };
+
+  const toggleSort = (column) => {
+    if (sortColumn === column) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortOrder("asc");
+    }
+  };
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
     }
   };
 
@@ -90,14 +141,14 @@ function Users() {
                                       <option value="banned">Banned</option>
                                     </select>
                                 </div>
-                                <div className="flex items-center space-x-2 ml-4">
+                                {/* <div className="flex items-center space-x-2 ml-4">
                                     <label className="block text-base mb-2">Shows</label>
                                     <select value={showCount} onChange={(e) => setShowCount(parseInt(e.target.value))} className="border border-gray-300 rounded-md px-4 py-2 text-center">
                                         <option value={10}>10</option>
                                         <option value={20}>20</option>
                                         <option value={30}>30</option>
                                     </select>
-                                </div>
+                                </div> */}
                             </div>  
                             <input
                                 type="text"
@@ -112,27 +163,51 @@ function Users() {
               <thead className="bg-gray-200 text-gray-600 table-header-group">
                 <tr className="text-left">
                   <th className="p-2">#</th>
-                  <th className="p-2">Username</th>
+                  {/* <th className="p-2">Username</th> */}
+                  <th className="p-2 cursor-pointer" onClick={() => toggleSort('username')}>Username</th>
+                  <th className="p-2 cursor-pointer" onClick={() => toggleSort('created_at')}>Created At</th>
                   <th className="p-2">Email</th>
                   <th className="p-2">Status</th>
                   <th className="p-2">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.map((users, index) => (
+                {currentItems.map((users, index) => (
                   <tr key={users.id} className={index % 2 === 0 ? 'bg-red-50' : 'bg-gray-50'}>
-                    <td className="p-2">{index + 1}</td>
+                    <td className="p-2">{indexOfFirstItem + index + 1}</td>
                     <td className="p-2">{users.username}</td>
+                    <td className="p-2">{formatDate(users.created_at)}</td>
                     <td className="p-2">{users.email}</td>
                     <td className="p-2">{users.status}</td>
                     <td className="p-2 actions">
-                      <button onClick={() => handleSuspendUser(users.id)} className="text-red-500 mr-2">Banned |</button>
-                      <button onClick={() => handleUpdateRoleToAdmin(users.id)} className="text-red-500 mr-2">Promote to Admin</button>
+                      <button onClick={() => handleSuspendUser(users.id, users.username)} className="text-red-500 mr-2">Banned |</button>
+                      <button onClick={() => handleChangeRoleToAdmin(users.id, users.username)} className="text-red-500 mr-2">Promote to Admin</button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+
+            <div className="flex justify-between items-center mt-4">
+              <button
+                onClick={goToPreviousPage}
+                disabled={currentPage === 1}
+                className="px-3 py-1 bg-gray-300 rounded-md text-gray-700"
+              >
+                Previous
+              </button>
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 bg-gray-300 rounded-md text-gray-700"
+              >
+                Next
+              </button>
+            </div>
+
           </div>
         </div>
       </div>

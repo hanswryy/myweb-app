@@ -12,7 +12,8 @@ function Countries() {
   const [editName, setEditName] = useState(''); // State untuk nama country yang sedang diedit
   const [filteredCountries, setFilteredCountries] = useState([]); // State untuk menyimpan negara yang difilter
   const [searchTerm, setSearchTerm] = useState(''); // State untuk pencarian
-  const [showCount, setShowCount] = useState(10); // State untuk jumlah item yang ditampilkan
+  const [currentPage, setCurrentPage] = useState(1); // Menyimpan halaman aktif
+  const itemsPerPage = 10; // Jumlah item per halaman
 
   const fetchCountries = async () => {
     try {
@@ -122,11 +123,25 @@ function Countries() {
     } else {
       setFilteredCountries(countries);
     }
+    setCurrentPage(1);
   };
 
-  // Fungsi untuk mengubah jumlah item yang ditampilkan
-  const handleShowCountChange = (e) => {
-    setShowCount(Number(e.target.value));
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredCountries.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredCountries.length / itemsPerPage);
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
   };
 
   if (loading) {
@@ -177,8 +192,8 @@ function Countries() {
               </div>
             </form>
 
-            <div className="flex flex-col lg:flex-row space-y-4 lg:space-x-2 mb-4 flex-wrap justify-between">
-                            <div className="flex flex-row">
+            <div className="flex flex-col lg:flex-row space-y-4 lg:space-x-2 mb-4 flex-wrap justify-end">
+                            {/* <div className="flex flex-row">
                                 <div className="flex items-center space-x-2">
                                     <label className="block text-base mb-2">Shows</label>
                                     <select className="border border-gray-300 rounded-md px-4 py-2 text-center" value={showCount} onChange={handleShowCountChange}>
@@ -187,7 +202,7 @@ function Countries() {
                                         <option>30</option>
                                     </select>
                                 </div>
-                            </div>  
+                            </div>   */}
                             <input
                                 type="text"
                                 placeholder="Search Countries"
@@ -206,9 +221,9 @@ function Countries() {
                 </tr>
               </thead>
               <tbody>
-                {filteredCountries.slice(0, showCount).map((country, index) => (
+                {currentItems.map((country, index) => (
                   <tr key={country.id} className={index % 2 === 0 ? 'bg-red-50' : 'bg-gray-50'}>
-                    <td className="p-2">{index + 1}</td>
+                    <td className="p-2">{indexOfFirstItem + index + 1}</td>
                     <td className="p-2">
                       {editingCountry === country.id ? (
                         <input
@@ -256,6 +271,27 @@ function Countries() {
                 ))}
               </tbody>
             </table>
+
+            <div className="flex justify-between items-center mt-4">
+              <button
+                onClick={goToPreviousPage}
+                disabled={currentPage === 1}
+                className="px-3 py-1 bg-gray-300 rounded-md text-gray-700"
+              >
+                Previous
+              </button>
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 bg-gray-300 rounded-md text-gray-700"
+              >
+                Next
+              </button>
+            </div>
+
           </div>
         </div>
       </div>

@@ -15,8 +15,9 @@ function Actors() {
   const [previewImage, setPreviewImage] = useState(''); // Untuk menyimpan file foto yang diunggah
   const [editId, setEditId] = useState('');
   const [filterCountry, setFilterCountry] = useState(''); // State for selected country filter
-const [showCount, setShowCount] = useState(10); // State for number of shows per page
-const [searchTerm, setSearchTerm] = useState(''); // State for the search term
+  const [searchTerm, setSearchTerm] = useState(''); // State for the search term
+  const [currentPage, setCurrentPage] = useState(1); // Menyimpan halaman aktif
+  const itemsPerPage = 10; // Jumlah item per halaman
 
 // Filter and search actors based on filterCountry and searchTerm
 const filteredActors = actor
@@ -24,7 +25,7 @@ const filteredActors = actor
     (filterCountry === '' || actor.country_id === parseInt(filterCountry)) &&
     (searchTerm === '' || actor.name.toLowerCase().includes(searchTerm.toLowerCase()))
   )
-  .slice(0, showCount);
+  .slice(0);
 
   useEffect(() => {
     fetchActors();
@@ -166,6 +167,24 @@ const filteredActors = actor
       }
   };
 
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredActors.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredActors.length / itemsPerPage);
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
   return (
     <div className="bg-gray-100">
       <div className="container mx-auto px-4 py-6">
@@ -210,7 +229,7 @@ const filteredActors = actor
                     accept="image/*"
                   />
                   {previewImage && (
-                    <img src={previewImage} alt="Preview" className="w-20 h-20 rounded" />
+                    <img src={previewImage} alt="Preview" className="w-28 h-32" />
                   )}
                 </div>
               </div>
@@ -274,7 +293,7 @@ const filteredActors = actor
                                       ))}
                                     </select>
                                 </div>
-                                <div className="flex items-center space-x-2 ml-4">
+                                {/* <div className="flex items-center space-x-2 ml-4">
                                     <label htmlFor="showCount" className="block text-base mb-2">Shows</label>
                                     <select
                                       id="showCount"
@@ -287,7 +306,7 @@ const filteredActors = actor
                                     <option value={20}>20</option>
                                     <option value={30}>30</option>
                                     </select>
-                                </div>
+                                </div> */}
                             </div>  
                             <input
                                 type="text"
@@ -304,7 +323,7 @@ const filteredActors = actor
               <thead className="bg-gray-200 text-gray-600 table-header-group">
                 <tr className="text-left">
                   <th className="p-2">#</th>
-                  <th className="p-2">Country</th>
+                  <th className="p-2">Countries</th>
                   <th className="p-2">Actor Name</th>
                   <th className="p-2">Birth Date</th>
                   <th className="p-2">Photo</th>
@@ -312,14 +331,14 @@ const filteredActors = actor
                 </tr>
               </thead>
               <tbody>
-                {filteredActors.map((actor, index) => (
+                {currentItems.map((actor, index) => (
                     <tr key={actor.id} className={index % 2 === 0 ? "bg-red-50" : "bg-gray-50"}>
-                      <td className="p-2">{index + 1}</td>
-                      <td className="p-2">{countries.find(country => country.id === actor.country_id)?.name || "Unknown"}</td>
+                      <td className="p-2">{indexOfFirstItem + index + 1}</td>
+                      <td className="p-2">{countries.find(country => country.id === actor.country_id)?.name || ''}</td>
                       <td className="p-2">{actor.name}</td>
                       <td className="p-2">{actor.birth_date.split('T')[0]}</td>
                       <td>
-                        <img src={actor.url_photo} className="custom-img" alt={actor.name} />
+                        <img src={actor.url_photo} className="custom-img w-28 h-32" alt={actor.name} />
                       </td>
                       <td className="p-2 actions">
                         {editId === actor.id ? (
@@ -358,6 +377,27 @@ const filteredActors = actor
                   ))}
               </tbody>
             </table>
+
+            <div className="flex justify-between items-center mt-4">
+              <button
+                onClick={goToPreviousPage}
+                disabled={currentPage === 1}
+                className="px-3 py-1 bg-gray-300 rounded-md text-gray-700"
+              >
+                Previous
+              </button>
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 bg-gray-300 rounded-md text-gray-700"
+              >
+                Next
+              </button>
+            </div>
+
           </div>
         </div>
       </div>
