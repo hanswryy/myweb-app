@@ -544,7 +544,7 @@ app.delete('/country/:id', async (req, res) => {
 // get all genres from genre table
 app.get('/genre', async (req, res) => {
     try {
-        const { rows } = await pool.query('SELECT * FROM genre ORDER BY id DESC');
+        const { rows } = await pool.query('SELECT * FROM genrev2 ORDER BY id DESC');
         res.set('Cache-Control', 'no-store');
         res.json(rows);
     } catch (error) {
@@ -561,7 +561,7 @@ app.post('/genre', async (req, res) => {
 
     try {
         const newGenre = await pool.query(
-            'INSERT INTO genre (genre) VALUES ($1) RETURNING *',
+            'INSERT INTO genrev2 (genre_name) VALUES ($1) RETURNING *',
             [genre]
         );
         res.status(201).json(newGenre.rows[0]);
@@ -578,7 +578,7 @@ app.put('/genre/:id', async (req, res) => {
 
     try {
         const updatedGenre = await pool.query(
-            'UPDATE genre SET genre = $1 WHERE id = $2 RETURNING *',
+            'UPDATE genrev2 SET genre_name = $1 WHERE id = $2 RETURNING *',
             [genre, id]
         );
         res.json(updatedGenre.rows[0]);
@@ -593,7 +593,7 @@ app.delete('/genre/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        await pool.query('DELETE FROM genre WHERE id = $1', [id]);
+        await pool.query('DELETE FROM genrev2 WHERE id = $1', [id]);
         res.json({ message: 'Genre deleted successfully' });
     } catch (error) {
         console.error('Error deleting genre:', error);

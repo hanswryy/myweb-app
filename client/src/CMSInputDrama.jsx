@@ -168,6 +168,13 @@ const CMSInputDrama = () => {
             console.error('Error fetching actors:', error);
         }
     };
+
+    const handleRemoveActor = (actorId) => {
+        setFormData((prevData) => ({
+          ...prevData,
+          actors: prevData.actors.filter((actor) => actor.id !== actorId),
+        }));
+    };
     
     const handleGenreChange = (e) => {
         const { value, checked } = e.target;
@@ -458,6 +465,13 @@ const CMSInputDrama = () => {
                                                         <li key={actor.id} className="flex items-center p-2">
                                                             <img src={actor.url_photo} alt={actor.name} className="w-10 h-10 rounded-full mr-2" />
                                                             <span>{actor.name}</span>
+                                                            <button
+                                                                type="button"
+                                                                className="ml-2 text-xs text-red-500"
+                                                                onClick={() => handleRemoveActor(actor.id)}
+                                                            >
+                                                                X
+                                                            </button>
                                                         </li>
                                                     ))}
                                                 </ul>

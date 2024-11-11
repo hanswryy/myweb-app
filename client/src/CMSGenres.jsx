@@ -223,7 +223,7 @@ function Genres() {
                           className="border border-gray-300 rounded px-2 py-1 w-full"
                         />
                       ) : (
-                        genre.genre
+                        genre.genre_name
                       )}
                     </td>
                     <td className="p-2 actions">

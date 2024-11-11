@@ -256,6 +256,13 @@ const CMSUpdateDrama = () => {
         }));
         setActorSuggestions([]); // Clear suggestions after selection
     };
+
+    const handleRemoveActor = (actorId) => {
+        setFormData((prevData) => ({
+          ...prevData,
+          actors: prevData.actors.filter((actor) => actor.id !== actorId),
+        }));
+    };
     
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -531,6 +538,13 @@ const CMSUpdateDrama = () => {
                                                         <li key={actor.id} className="flex items-center p-2">
                                                             <img src={actor.url_photo} alt={actor.name} className="w-10 h-10 rounded-full mr-2" />
                                                             <span>{actor.name}</span>
+                                                            <button
+                                                            type="button"
+                                                            className="text-red-500 ml-2"
+                                                            onClick={() => handleRemoveActor(actor.id)}
+                                                            >
+                                                                X
+                                                            </button>
                                                         </li>
                                                     ))}
                                                 </ul>

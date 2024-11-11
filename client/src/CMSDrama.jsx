@@ -121,7 +121,8 @@ function CMSDrama() {
                                             <td className="px-6 py-4">{index + 1}</td>
                                             <td className="px-6 py-4">{drama.title}</td>
                                             <td className="px-6 py-4">{drama.actors}</td>
-                                            <td className="px-6 py-4">{drama.genres}</td>
+                                            {/* give space for each genres with comma */}
+                                            <td className="px-6 py-4">{drama.genres.join(', ')}</td>
                                             <td className="px-6 py-4">{drama.synopsis}</td>
                                             <td className="px-6 py-4">{drama.status}</td>
                                             <td className="px-6 py-4">
