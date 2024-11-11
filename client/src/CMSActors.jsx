@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import './index.css';
 import SideBarCMS from './components/SideBarCMS';
+import { Link } from 'react-router-dom';
 
 function Actors() {
   const [actor, setActor] = useState([]);
@@ -189,7 +190,9 @@ const filteredActors = actor
     <div className="bg-gray-100">
       <div className="container mx-auto px-4 py-6">
         <div className="mb-6">
+          <Link to="/">
           <h1 className="text-xl font-bold">DramaKu</h1>
+          </Link>
         </div>
 
         <div className="flex space-x-4">

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './App.css';
 import './index.css';
 import SideBarCMS from './components/SideBarCMS';
+import { Link } from 'react-router-dom';
 
 function Countries() {
   const [countries, setCountries] = useState([]); // State untuk menyimpan data negara
@@ -156,7 +157,9 @@ function Countries() {
     <div className="bg-gray-50">
       <div className="container mx-auto px-4 py-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold">DramaKu</h1>
+          <Link to="/">
+          <h1 className="text-xl font-bold">DramaKu</h1>
+          </Link>
         </div>
 
         <div className="flex space-x-4">

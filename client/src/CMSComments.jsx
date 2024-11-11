@@ -1,12 +1,15 @@
 import React from "react";
 import SideBarCMS from "./components/SideBarCMS";
+import { Link } from "react-router-dom";
 
 const CMSComments = () => {
     return (
         <div class="bg-gray-50">
             <div class="container mx-auto px-4 py-6">
                 <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-2xl font-bold">DramaKu</h1>
+                <Link to="/">
+                    <h1 className="text-xl font-bold">DramaKu</h1>
+                </Link>
                 </div>
     
                 <div class="flex space-x-4 mb-6">

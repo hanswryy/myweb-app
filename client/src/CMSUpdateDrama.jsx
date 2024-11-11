@@ -2,7 +2,7 @@ import React from "react";
 import ikuyo from "./images/ikuyoo.jpeg";
 import SideBarCMS from "./components/SideBarCMS";
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 
 // const CMSInputDrama = () => {
 //     return (
@@ -320,7 +320,9 @@ const CMSUpdateDrama = () => {
         <div className="bg-gray-50">
             <div className="container mx-auto px-4 py-6">
                 <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-bold">DramaKu</h1>
+                <Link to="/">
+                <h1 className="text-xl font-bold">DramaKu</h1>
+                </Link>
                 </div>
 
                 <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-4 mb-6">

@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from "react";
 import Actor from './components/Actor';
 import SideBarCMS from "./components/SideBarCMS";
 import Review from './components/Review';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 import placeholder from "./images/video_player_placeholder.png";
 import ikuyo from "./images/ikuyoo.jpeg";
@@ -50,6 +50,11 @@ function CMSDrama() {
 
     const handleDelete = async (id) => {
         // goes to /delete_drama/:id
+        const confirmDelete = window.confirm('Are you sure you want to delete this drama?');
+        if (!confirmDelete) {
+            return;
+        }
+        
         try {
             const response = await fetch(`/delete_drama/${id}`, {
                 method: 'DELETE',
@@ -68,7 +73,9 @@ function CMSDrama() {
         <div className="bg-gray-50">
             <div className="container mx-auto px-4 py-6">
                 <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-bold">DramaKu</h1>
+                <Link to="/">
+                <h1 className="text-xl font-bold">DramaKu</h1>
+                </Link>
                 </div>
   
                 <div className="flex space-x-4 mb-6">
