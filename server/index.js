@@ -952,6 +952,50 @@ app.delete('/delete_drama/:id', async (req, res) => {
     }
 });
 
+// endpoint for create comment based on user_id and drama_id
+app.post('/comment', async (req, res) => {
+    const { user_id, drama_id, comment } = req.body;
+    try {
+        const result = await pool.query(
+            'INSERT INTO comments (user_id, drama_id, content) VALUES ($1, $2, $3) RETURNING *',
+            [user_id, drama_id, comment]
+        );
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ error: 'Internal Server Error create comment' });
+    }
+});
+
+// endpoint for get all comments based on drama_id
+app.get('/comment/:drama_id', async (req, res) => {
+    const { drama_id } = req.params;
+    try {
+        const { rows } = await pool.query('SELECT * FROM comments WHERE drama_id = $1 ORDER BY id DESC', [drama_id]);
+        // get username from user_id
+        for (let i = 0; i < rows.length; i++) {
+            const user = await pool.query('SELECT username FROM users WHERE id = $1', [rows[i].user_id]);
+            rows[i].username = user.rows[0].username;
+        }
+        res.json(rows);
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ error: 'Internal Server Error get comment' });
+    }
+});
+
+// endpoint for delete comment
+app.delete('/comment/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM comments WHERE id = $1', [id]);
+        res.json({ message: 'Comment deleted successfully' });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Server listening on ${PORT}`);
 });

@@ -110,6 +110,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom'; // Import useParams untuk mengambil ID dari URL
 import Actor from './components/Actor';
 import Review from './components/Review'; // Jika Anda menggunakan Review, tetap masukkan ini
+import { jwtDecode } from 'jwt-decode';
 
 const transformToEmbedUrl = (url) => {
     try {
@@ -137,6 +138,9 @@ function DetailPage() {
     const [drama, setDrama] = useState(null); // State untuk menyimpan data drama
     const [loading, setLoading] = useState(true); // State untuk loading
     const [error, setError] = useState(null); // State untuk menyimpan error
+    const [comments, setComments] = useState([]); // State untuk menyimpan komentar
+    const [newComment, setNewComment] = useState(''); // State untuk menyimpan komentar baru
+    const [userId, setUserId] = useState(1); // State untuk menyimpan ID pengguna
 
     const fetchDrama = async () => {
         try {
@@ -159,8 +163,56 @@ function DetailPage() {
         }
     };
 
+    const fetchComments = async () => {
+        try {
+            const response = await fetch(`/comment/${id}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch comments');
+            }
+            const data = await response.json();
+            setComments(data);
+        } catch (error) {
+            console.error('Error fetching comments:', error);
+        }
+    };
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+          try {
+            const decodedToken = jwtDecode(token);
+            setUserId(decodedToken.id); // Extract user ID from token
+          } catch (error) {
+            console.error("Invalid token");
+          }
+        }
+    }, []);
+
+
+    const postComment = async () => {
+        try {
+            console.log(userId, id, newComment);
+            const response = await fetch('/comment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: userId, drama_id: id, comment: newComment }),
+            });
+            if (!response.ok) {
+                throw new Error('Failed to post comment');
+            }
+            const data = await response.json();
+            setComments((prevComments) => [data, ...prevComments]);
+            setNewComment('');
+        } catch (error) {
+            console.error('Error posting comment:', error);
+        }
+    };
+
     useEffect(() => {
         fetchDrama(); // Panggil fungsi fetchDrama saat komponen di-mount
+        fetchComments(); // Panggil fungsi fetchComments saat komponen di-mount
     }, [id]);    
 
     if (loading) {
@@ -221,6 +273,25 @@ function DetailPage() {
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowFullScreen
                         ></iframe>
+                    </div>
+                    {/* comment section */}
+                    <div>
+                        <h2>Comments</h2>
+                        <div>
+                            {comments.map((comment) => (
+                                <div key={comment.id}>
+                                    <p><strong>{comment.username}</strong>: {comment.content}</p>
+                                </div>
+                            ))}
+                        </div>
+                        <div>
+                            <textarea
+                                value={newComment}
+                                onChange={(e) => setNewComment(e.target.value)}
+                                placeholder="Write a comment..."
+                            />
+                            <button onClick={postComment}>Post Comment</button>
+                        </div>
                     </div>
                 </div>
             </div>
