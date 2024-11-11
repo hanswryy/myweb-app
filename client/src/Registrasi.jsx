@@ -13,6 +13,18 @@ function Registrasi() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // handle username < 5 characters and > 50 characters
+    if (username.length < 5 || username.length > 50) {
+      setMessage('Username must be between 5 and 50 characters');
+      return;
+    }
+
+    // handle password < 8 characters and > 50 characters
+    if (password.length < 8 || password.length > 50) {
+      setMessage('Password must be between 8 and 50 characters');
+      return;
+    }
+
     // Prepare the data for the API call
     const userData = {
       username,
