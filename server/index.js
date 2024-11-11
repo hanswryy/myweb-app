@@ -156,7 +156,7 @@ app.get('/dramas', (req, res) => {
     }
 
     const query = `
-        SELECT d.*, ARRAY_AGG(g.genrev2) AS genres
+        SELECT d.*, ARRAY_AGG(g.genre_name) AS genres
         FROM dramav2 d
         JOIN drama_genre dg ON d.id = dg.drama_id
         JOIN genrev2 g ON dg.genre_id = g.id
