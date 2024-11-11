@@ -967,6 +967,17 @@ app.post('/comment', async (req, res) => {
     }
 });
 
+// endpoint to get all comments
+app.get('/comments', async (req, res) => {
+    try {
+        const { rows } = await pool.query('SELECT * FROM comments ORDER BY id DESC');
+        res.json(rows);
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ error: 'Internal Server Error get comment' });
+    }
+});
+
 // endpoint for get all comments based on drama_id
 app.get('/comment/:drama_id', async (req, res) => {
     const { drama_id } = req.params;
