@@ -9,6 +9,7 @@ function LandingPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [years, setYears] = useState([]);
   const [genres, setGenres] = useState([]);
+  const [awards, setAwards] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
   const [dramas, setDramas] = useState([]);
   const [currentPage, setCurrentPage] = useState(1); // Current page state
@@ -180,6 +181,20 @@ function LandingPage() {
     fetchGenres();
   }, []);
 
+  useEffect(() => {
+    const fetchAwards = async () => {
+      try {
+        const response = await fetch('/award');
+        const data = await response.json();
+        setAwards(data);
+      } catch {
+        console.error("Error fetching awards");
+      }
+    };
+
+    fetchAwards();
+  }, []);
+
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="container mx-auto px-4 py-6">
@@ -310,14 +325,7 @@ function LandingPage() {
                       <option value="Viu">Viu</option>
                       <option value="Disney">Disney</option>
                     </select>
-                      {/* <select
-                        name="award"
-                        className="border border-gray-300 rounded px-4 py-2"
-                        value={filters.award}
-                        onChange={handleFilterChange}
-                      >
-                        <option value="">Award</option>
-                      </select> */}
+                    
                       <select
                         name="sort"
                         className="border border-gray-300 rounded px-4 py-2"
@@ -401,7 +409,12 @@ function LandingPage() {
                     onChange={handleFilterChange}
                   >
                     <option value="">Award</option>
-                  </select> */}
+                    {awards.map((award) => (
+                    <option key={award} value={award}>
+                      {award}
+                    </option>
+                    ))}
+                  </select>*/}
                   <select
                     name="sort"
                     className="border border-gray-300 rounded px-4 py-2"

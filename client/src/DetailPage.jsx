@@ -205,6 +205,7 @@ function DetailPage() {
             const data = await response.json();
             setComments((prevComments) => [data, ...prevComments]);
             setNewComment('');
+            window.location.reload();
         } catch (error) {
             console.error('Error posting comment:', error);
         }

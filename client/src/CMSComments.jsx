@@ -109,17 +109,17 @@ const CMSComments = () => {
     useEffect(() => {
       const fetchComments = async () => {
         try {
-          const response = await fetch('/comments');
-          const data = response.data;
-          console.log("data: " + data);
-          setComments(data.comments || []); // Assuming 10 items per page
+            const response = await fetch('/comments');
+            const data = await response.json();
+            setComments(data);
+            console.log(data);
         } catch (error) {
           console.error('Error fetching comments:', error);
         }
       };
   
       fetchComments();
-    }, [searchTerm]);
+    }, []);
   
     const handleDelete = async (id) => {
       const confirmed = window.confirm('Are you sure you want to delete this comment?');
@@ -201,17 +201,16 @@ const CMSComments = () => {
                       <th className="px-6 py-3 text-left">Drama</th>
                       <th className="px-6 py-3 text-left">Username</th>
                       <th className="px-6 py-3 text-left">Comment</th>
-                      <th className="px-6 py-3 text-left">Date</th>
                       <th className="px-6 py-3 text-left w-1/12">Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {Array.isArray(comments) && comments.map((comment, index) => (
                       <tr key={comment.id} className="bg-gray-100 text-gray-600">
-                        <td className="px-6 py-4">{comment.drama_name}</td>
+                        <td className="px-6 py-4">{index + 1}</td>
+                        <td className="px-6 py-4">{comment.drama_title}</td>
                         <td className="px-6 py-4">{comment.username}</td>
                         <td className="px-6 py-4">{comment.content}</td>
-                        <td className="px-6 py-4">{new Date(comment.created_at).toLocaleDateString()}</td>
                         <td className="px-6 py-4 flex space-x-2">
                           <button
                             className="bg-red-500 text-white px-4 py-1 rounded-xl"

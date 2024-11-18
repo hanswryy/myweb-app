@@ -473,6 +473,17 @@ app.post('/auth/register', async (req, res) => {
     }
 });
 
+// fetch all years
+app.get('/years', async (req, res) => {
+    try {
+        const { rows } = await pool.query('SELECT DISTINCT year FROM dramav2 ORDER BY year DESC');
+        res.json(rows.map(row => row.year));
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 // get all countries from country table
 app.get('/country', async (req, res) => {
     try {
@@ -971,6 +982,16 @@ app.post('/comment', async (req, res) => {
 app.get('/comments', async (req, res) => {
     try {
         const { rows } = await pool.query('SELECT * FROM comments ORDER BY id DESC');
+        // get drama title from drama_id
+        for (let i = 0; i < rows.length; i++) {
+            const drama = await pool.query('SELECT title FROM dramav2 WHERE id = $1', [rows[i].drama_id]);
+            rows[i].drama_title = drama.rows[0].title;
+        }
+        // get username from user_id
+        for (let i = 0; i < rows.length; i++) {
+            const user = await pool.query('SELECT username FROM users WHERE id = $1', [rows[i].user_id]);
+            rows[i].username = user.rows[0].username;
+        }
         res.json(rows);
     } catch (error) {
         console.error(error.message);
