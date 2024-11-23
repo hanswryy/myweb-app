@@ -53,9 +53,11 @@ function LandingPage() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+    console.log('Token is:', token);
     if (token) {
       try {
         const decodedToken = jwtDecode(token);
+        console.log('Decoded token:', decodedToken);
         setRole(decodedToken.role); // Extract role from token
         setUserID(decodedToken.id); // Extract user ID from token
         setIsLoggedIn(true); // Set user as logged in
