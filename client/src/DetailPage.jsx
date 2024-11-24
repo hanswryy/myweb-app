@@ -170,6 +170,7 @@ function DetailPage() {
                 throw new Error('Failed to fetch comments');
             }
             const data = await response.json();
+            console.log('Fetched comments:', data);
             setComments(data);
         } catch (error) {
             console.error('Error fetching comments:', error);

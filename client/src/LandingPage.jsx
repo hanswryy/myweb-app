@@ -62,7 +62,7 @@ function LandingPage() {
         setUserID(decodedToken.id); // Extract user ID from token
         setIsLoggedIn(true); // Set user as logged in
       } catch (error) {
-        console.error("Invalid token");
+        console.error("Invalid token", error);
       }
     }
   }, []);
@@ -83,6 +83,7 @@ function LandingPage() {
         const response = await fetch(`/dramas?${query}`);
         const data = await response.json();
         setDramas(data.dramas); // Update dramas from API response
+        console.log(data.dramas);
         setTotalCount(data.total); // Update total count from API response
       } catch (error) {
         console.error("Error fetching dramas:", error);
@@ -160,6 +161,7 @@ function LandingPage() {
         const response = await fetch('/years')
         const data = await response.json();
         setYears(data);
+        console.log(data);
       } catch (error) {
         console.error("Error fetching years")
       }

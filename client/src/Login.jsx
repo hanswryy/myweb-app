@@ -115,6 +115,7 @@ function Login() {
             <div className='mb-4'></div>
 
             <GoogleLogin className="p-4"
+              data-testid="google-login"
               onSuccess={handleGoogleSuccess}
               onFailure={handleGoogleFailure}
               style={{ marginTop: '10px' }}
