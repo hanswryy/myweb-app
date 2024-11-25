@@ -10,18 +10,6 @@ jest.mock('react-router-dom', () => ({
   useNavigate: jest.fn(),
 }));
 
-// Mock Google Login component
-// jest.mock('@react-oauth/google', () => ({
-//   GoogleLogin: ({ onSuccess, onFailure }) => (
-//     <button
-//       data-testid="google-login"
-//       onClick={() => onSuccess({ credential: 'mockGoogleToken' })}
-//     >
-//       Google Login
-//     </button>
-//   ),
-// }));
-
 // Mock the `fetch` API
 global.fetch = jest.fn();
 
