@@ -142,7 +142,7 @@ describe('LandingPage func test', () => {
     test('dramas fetched', async () => {
         render(
             <Router>
-            <LandingPage />
+              <LandingPage />
             </Router>
         );
 
@@ -156,7 +156,7 @@ describe('LandingPage func test', () => {
     test('search drama', async () => {
         render(
             <Router>
-                <LandingPage />
+              <LandingPage />
             </Router>
         );
 

@@ -1,0 +1,51 @@
+version: '1'
+services:
+    backend:
+        build:
+            context: ./server
+            dockerfile: Dockerfile.dev
+        volumes:
+            - /app/node_modules
+            - ./config:/app/config
+            - ./server:/app/server
+            - ./test:/app/test
+        ports:
+            - "3001:3001"
+        networks:
+            - app-network
+        env_file:
+            - .env
+        depends_on:
+            - db
+        environment:
+            - DATABASE_URL=postgresql://myuser:mypass@db:5432/mydatabase
+    ui:
+        build:
+            context: ./client
+            dockerfile: Dockerfile.dev
+        volumes:
+            - /app/node_modules
+            - ./client:/app
+        ports:
+            - "3000:3000"
+        networks:
+            - app-network
+    db:
+        image: postgres:alpine
+        networks:
+            - app-network
+        ports:
+            - "5432:5432"
+        environment:
+            - POSTGRES_USER=myuser
+            - POSTGRES_PASSWORD=mypass
+            - POSTGRES_DB=mydb
+        volumes:
+            - db-data:/var/lib/postgresql/data
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+    db-data:
