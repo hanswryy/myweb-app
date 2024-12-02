@@ -4,6 +4,7 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile.dev
+      network: host
     volumes:
       - /app/node_modules
       - ./config:/app/config
@@ -24,6 +25,7 @@ services:
     build:
       context: ./client
       dockerfile: Dockerfile.dev
+      network: host
     volumes:
       - /app/node_modules
       - ./client:/app
