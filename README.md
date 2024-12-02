@@ -74,6 +74,14 @@ Jalankan perintah berikut untuk menginstall semua dependencies yang dibutuhkan b
   npm install
 ```
 
+**Make .env file**
+
+Buat sebuah file .env yang berisi
+
+```bash
+  JWT_SECRET=superStrongJWTTOKEN123
+```
+
 ### Running
 
 **Frontend (client)**
@@ -99,6 +107,12 @@ Go to the project directory
 
 ```bash
   cd myweb-app
+```
+
+Buat sebuah file .env yang berisi
+
+```bash
+  JWT_SECRET=superStrongJWTTOKEN123
 ```
 
 Run docker compose
