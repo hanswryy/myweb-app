@@ -92,26 +92,22 @@ Jalankan perintah berikut untuk menginstall semua dependencies yang dibutuhkan b
 Clone the project
 
 ```bash
-  git clone https://link-to-project
+  https://github.com/hanswryy/myweb-app.git
 ```
 
 Go to the project directory
 
 ```bash
-  cd my-project
+  cd myweb-app
 ```
 
-Install dependencies
+Run docker compose
 
 ```bash
-  npm install
+  docker-compose up -d
 ```
 
-Start the server
-
-```bash
-  npm run start
-```
+Go see localhost:3000
 
 ## Default Admin Credentials
 
