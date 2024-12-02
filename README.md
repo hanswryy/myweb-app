@@ -1,5 +1,6 @@
-
-![App Screenshot](./client/public/dramaku.png)
+<div align="center">
+  <img src="./client/public/dramaku.png" alt="App Screenshot" width="500px">
+</div>
 
 
 # Aplikasi DramaKu
