@@ -44,6 +44,14 @@ Tentukan terlebih dahulu di folder mana anda akan menyimpan project, lalu jalank
   git clone https://github.com/hanswryy/myweb-app.git
 ```
 
+**Make .env file**
+
+Buat sebuah file .env yang berisi
+
+```bash
+  JWT_SECRET=superStrongJWTTOKEN123
+```
+
 **Go to the client directory**
 
 ```bash
@@ -72,14 +80,6 @@ Jalankan perintah berikut untuk menginstall semua dependencies yang dibutuhkan b
 
 ```bash
   npm install
-```
-
-**Make .env file**
-
-Buat sebuah file .env yang berisi
-
-```bash
-  JWT_SECRET=superStrongJWTTOKEN123
 ```
 
 ### Running
