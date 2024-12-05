@@ -15,7 +15,7 @@ function Login() {
     e.preventDefault(); // Prevent the default form submission
 
     try {
-      const response = await fetch('http://localhost:3001/auth/login', {
+      const response = await fetch('/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -47,7 +47,7 @@ function Login() {
     console.log('Google login successful!', credentialResponse);
     
     // Send the Google token to your backend for verification
-    const res = await fetch('http://localhost:3001/auth/google', {
+    const res = await fetch('/auth/google', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

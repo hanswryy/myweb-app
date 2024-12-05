@@ -161,7 +161,7 @@ const CMSInputDrama = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:3001/actors?search=${searchTerm}`);
+            const response = await fetch(`/actors?search=${searchTerm}`);
             const data = await response.json();
             setActorSuggestions(data);
         } catch (error) {
@@ -243,7 +243,7 @@ const CMSInputDrama = () => {
         };
     
         try {
-            const response = await fetch('http://localhost:3001/new_drama', {
+            const response = await fetch('/new_drama', {
                 method: 'POST',
                 headers: {
                 'Content-Type': 'application/json',

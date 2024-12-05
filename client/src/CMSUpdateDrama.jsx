@@ -149,7 +149,7 @@ const CMSUpdateDrama = () => {
           // Fetch drama details and populate form fields using fetch
           const fetchDramaDetails = async () => {
             try {
-                const response = await fetch(`http://localhost:3001/dramas/${id}`);
+                const response = await fetch(`/dramas/${id}`);
                 const data = await response.json();
                 console.log('Fetched drama details:', data);
         
@@ -187,7 +187,7 @@ const CMSUpdateDrama = () => {
         // Fetch all genres
         const fetchGenres = async () => {
             try {
-                const response = await fetch('http://localhost:3001/genres');
+                const response = await fetch('/genres');
                 const data = await response.json();
                 setAllGenres(data);
             } catch (error) {
@@ -217,7 +217,7 @@ const CMSUpdateDrama = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:3001/actors?search=${searchTerm}`);
+            const response = await fetch(`/actors?search=${searchTerm}`);
             const data = await response.json();
             setActorSuggestions(data);
         } catch (error) {
@@ -299,7 +299,7 @@ const CMSUpdateDrama = () => {
         };
     
         try {
-            const response = await fetch(`http://localhost:3001/update_drama/${id}`, {
+            const response = await fetch(`/update_drama/${id}`, {
                 method: 'PUT',
                 headers: {
                 'Content-Type': 'application/json',

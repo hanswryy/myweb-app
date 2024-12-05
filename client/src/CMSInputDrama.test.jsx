@@ -46,7 +46,7 @@ describe('CMSInputDrama Component', () => {
 
     // Assert that fetch was called with the correct parameters
     await waitFor(() => {
-        expect(fetch).toHaveBeenCalledWith('http://localhost:3001/new_drama', {
+        expect(fetch).toHaveBeenCalledWith('/new_drama', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
