@@ -27,7 +27,7 @@ DramaKu adalah aplikasi manajemen film berbasis web yang menyediakan informasi l
 
 **Testing:** JEST
 
-**Deployment:** Docker
+**Deployment:** Docker, Amazon AWS EC2
 
 
 # Installation
@@ -95,19 +95,22 @@ Jalankan perintah berikut untuk menginstall semua dependencies yang dibutuhkan b
 ```bash
   npm start
 ```
+
 ## Run Locally with Docker
 
-Clone the project
+**Clone the project**
 
 ```bash
   https://github.com/hanswryy/myweb-app.git
 ```
 
-Go to the project directory
+**Go to the project directory**
 
 ```bash
   cd myweb-app
 ```
+
+**Make .env file**
 
 Buat sebuah file .env yang berisi
 
@@ -115,24 +118,26 @@ Buat sebuah file .env yang berisi
   JWT_SECRET=superStrongJWTTOKEN123
 ```
 
-Run docker compose
+**Run docker compose**
 
 ```bash
   docker-compose up -d
 ```
 
-Go see localhost:3000
+**Go see localhost:3000**
+
 
 ## Default Admin Credentials
 
-Setelah setting up aplikasi, masuk sebagai administrator menggunakan kredensial berikut:
+Setelah setting up aplikasi, jika ingin masuk sebagai administrator menggunakan kredensial berikut:
 
 **Username:** admin  
 **Password:** secretAdminP@ss123  
 
-# Demo
 
-Insert gif or link to demo
+# Deployment
+
+http://52.62.98.3:3000/
 
 
 # Contributors
