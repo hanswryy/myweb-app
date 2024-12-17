@@ -137,7 +137,7 @@ Setelah setting up aplikasi, jika ingin masuk sebagai administrator menggunakan 
 
 # Deployment
 
-http://52.62.98.3:3000/
+http://13.54.97.23:3000/
 
 
 # Contributors
